@@ -16,6 +16,7 @@
     <Compile Remove="Cards\Template.cs" />
     <Compile Remove="MonoBehaviours\CrystalShardModifier.cs" />
     <Compile Remove="MonoBehaviours\PlayerEffects\CADModulesEffect.cs" />
+    <Compile Remove="MonoBehaviours\PlayerStatus\ArcaneDamageOverTime.cs" />
     <Compile Remove="Patches\CardPickPatch.cs" />
     <Compile Remove="Utils\GunUtils.cs" />
   </ItemGroup>

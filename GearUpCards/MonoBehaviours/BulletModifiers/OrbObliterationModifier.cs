@@ -44,15 +44,32 @@ namespace GearUpCards.MonoBehaviours
             Player victimPlayer = hit.transform.GetComponent<Player>();
             int victimID = -1;
 
+
             if (victimPlayer)
             {
+                CharacterStatModifiers victimStats = victimPlayer.gameObject.GetComponent<CharacterStatModifiers>();
+                int protectionLvl = victimStats.GetGearData().glyphProtection;
+
                 // direct hit victim take more MAX HP loss
                 GameObject victim = victimPlayer.gameObject;
                 float effectValue = healthCullDirectHit - (0.10f * glyphPotency);
+                effectValue = Mathf.Clamp(effectValue, 0.05f, 1.0f);
+
+                float tValue = Mathf.Pow(0.90f, protectionLvl);
+                float lerp = Mathf.Lerp(1.0f, effectValue, tValue);
 
                 status = victim.GetOrAddComponent<HollowLifeEffect>();
-                status.ApplyTempHealthCap(effectValue);
-                victimPlayer.data.health *= effectValue;
+
+                if (protectionLvl > 0)
+                {
+                    status.ApplyTempHealthCap(lerp);
+                    victimPlayer.data.health *= lerp;
+                }
+                else
+                {
+                    status.ApplyTempHealthCap(effectValue);
+                    victimPlayer.data.health *= effectValue;
+                }
 
                 hitPLayer = true;
                 victimID = victimPlayer.playerID;
@@ -70,11 +87,27 @@ namespace GearUpCards.MonoBehaviours
                 playerDistance = (target.transform.position - gameObject.transform.position).magnitude;
                 if (playerDistance <= effectRadius)
                 {
+                    CharacterStatModifiers victimStats = target.gameObject.GetComponent<CharacterStatModifiers>();
+                    int protectionLvl = victimStats.GetGearData().glyphProtection;
+
                     float effectValue = healthCullAreaHit - (0.05f * glyphPotency);
+                    effectValue = Mathf.Clamp(effectValue, 0.05f, 1.0f);
 
                     status = target.gameObject.GetOrAddComponent<HollowLifeEffect>();
-                    status.ApplyTempHealthCap(effectValue);
-                    target.data.health *= effectValue;
+
+                    if (protectionLvl > 0)
+                    {
+                        float tValue = Mathf.Pow(0.90f, protectionLvl);
+                        float lerp = Mathf.Lerp(1.0f, effectValue, tValue);
+
+                        status.ApplyTempHealthCap(lerp);
+                        target.data.health *= lerp;
+                    }
+                    else
+                    {
+                        status.ApplyTempHealthCap(effectValue);
+                        target.data.health *= effectValue;
+                    }
                 }
             }
 

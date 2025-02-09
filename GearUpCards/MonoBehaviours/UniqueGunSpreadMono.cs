@@ -293,6 +293,11 @@ namespace GearUpCards.MonoBehaviours
                             // Miscs.Log(arc);
 
                             arc.arcSpread = prevSpread * prevSpreadMul;
+                            if (arc.arcSpread * 360f < gun.numberOfProjectiles)
+                            {
+                                arc.arcSpread = ((float)gun.numberOfProjectiles) / 360f;
+                            }
+
                             arc.bulletIndex = bulletFiredIndex;
                             arc.bulletsInVolley = gun.numberOfProjectiles;
                             bulletFiredIndex++;

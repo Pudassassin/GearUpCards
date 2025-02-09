@@ -15,8 +15,10 @@ using static GearUpCards.Utils.CardUtils;
 
 namespace GearUpCards.Cards
 {
-    class HyperRegeneration : CustomCard
+    class ArcaneConversionCard : CustomCard
     {
+        public static GameObject objectToSpawn = null;
+
         public override void SetupCard(CardInfo cardInfo, Gun gun, ApplyCardStats cardStats, CharacterStatModifiers statModifiers, Block block)
         {
             cardInfo.categories = new CardCategory[]
@@ -26,13 +28,32 @@ namespace GearUpCards.Cards
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-            data.healthHandler.regeneration += 25.0f;
+            // add ONLY one stack to the bullet modifier pool
+            if (characterStats.GetGearData().arcaneConversionStack == 0)
+            {
+                if (objectToSpawn == null)
+                {
+                    objectToSpawn = new GameObject("ArcaneConversionModifier", new Type[]
+                    {
+                        typeof(ArcaneConversionModifier)
+                    });
+                    DontDestroyOnLoad(objectToSpawn);
+                }
 
-            characterStats.GetGearData().hpPercentageRegen += 0.005f;
-            GearUpPreRoundEffects preRound = player.gameObject.GetOrAddComponent<GearUpPreRoundEffects>();
+                List<ObjectsToSpawn> list = gun.objectsToSpawn.ToList<ObjectsToSpawn>();
+                list.Add(new ObjectsToSpawn
+                {
+                    AddToProjectile = objectToSpawn
+                });
 
-            characterStats.GetGearData().hyperRegenerationStack += 1;
-            HollowLifeEffect hollowLife = player.gameObject.GetOrAddComponent<HollowLifeEffect>();
+                gun.objectsToSpawn = list.ToArray();
+            }
+
+            characterStats.GetGearData().arcaneConversionStack += 1;
+            if (characterStats.GetGearData().arcaneConversionStack >= 2)
+            {
+                gun.unblockable = true;
+            }
         }
         public override void OnRemoveCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
@@ -40,20 +61,19 @@ namespace GearUpCards.Cards
         }
         protected override string GetTitle()
         {
-            return "Hyper Regeneration!";
+            return "Arcane Conversion";
         }
         protected override string GetDescription()
         {
-            return "<i>\"You should've gone for the head... or one-shot kill.\"";
+            return "Part of your damage magically bypass armors and reactions.\n2nd copy: Full convert & Unblockable!\nExtra copies gains:";
         }
         protected override GameObject GetCardArt()
         {
-            // return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_MedicalParts");
-            return null;
+            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_ArcaneConversion");
         }
         protected override CardInfo.Rarity GetRarity()
         {
-            return CardInfo.Rarity.Uncommon;
+            return CardInfo.Rarity.Common;
         }
         protected override CardInfoStat[] GetStats()
         {
@@ -62,29 +82,22 @@ namespace GearUpCards.Cards
                 new CardInfoStat()
                 {
                     positive = true,
-                    stat = "Flat Regen",
-                    amount = "+25 /s",
-                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                },
-                new CardInfoStat()
-                {
-                    positive = true,
-                    stat = "HP Regen",
-                    amount = "+0.5% /s",
+                    stat = "\'DMG\' dealt",
+                    amount = "+35% All",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 },
                 new CardInfoStat()
                 {
                     positive = false,
-                    stat = "HP Cap",
-                    amount = "-15%",
+                    stat = "DMG taken",
+                    amount = "+10% All",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 }
             };
         }
         protected override CardThemeColor.CardThemeColorType GetTheme()
         {
-            return CardThemeColor.CardThemeColorType.PoisonGreen;
+            return CardThemeColor.CardThemeColorType.MagicPink;
         }
         public override string GetModName()
         {
@@ -92,7 +105,7 @@ namespace GearUpCards.Cards
         }
         public override void Callback()
         {
-            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Health\nPassive";
+            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Damage\nPassive";
         }
     }
 }

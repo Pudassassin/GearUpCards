@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 using UnboundLib;
 using UnboundLib.Cards;
-using ModdingUtils;
+using CardChoiceSpawnUniqueCardPatch.CustomCategories;
+
 using UnityEngine;
 
 using GearUpCards.MonoBehaviours;
+using GearUpCards.Utils;
 using GearUpCards.Extensions;
 using static GearUpCards.Utils.CardUtils;
 
 namespace GearUpCards.Cards
 {
-    class MedicCheckup : CustomCard
+    class HyperRegenerationCard : CustomCard
     {
         public override void SetupCard(CardInfo cardInfo, Gun gun, ApplyCardStats cardStats, CharacterStatModifiers statModifiers, Block block)
         {
@@ -25,32 +26,29 @@ namespace GearUpCards.Cards
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-            data.maxHealth += 250.0f;
+            data.healthHandler.regeneration += 25.0f;
 
-            characterStats.GetGearData().medicCheckupStack += 1;
+            characterStats.GetGearData().hpPercentageRegen += 0.005f;
+            GearUpPreRoundEffects preRound = player.gameObject.GetOrAddComponent<GearUpPreRoundEffects>();
 
-            // HollowLifeEffect effect = player.gameObject.GetOrAddComponent<HollowLifeEffect>();
-            
+            characterStats.GetGearData().hyperRegenerationStack += 1;
+            HollowLifeEffect hollowLife = player.gameObject.GetOrAddComponent<HollowLifeEffect>();
         }
         public override void OnRemoveCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-            // characterStats.GetGearData().hollowLifeStack -= 1; -- no need for this actually
 
-            // UnityEngine.Debug.Log($"[{GearUpCards.ModInitials}][Card] {GetTitle()} has been removed to player {player.playerID}.");
         }
         protected override string GetTitle()
         {
-            return "Medic!!!";
+            return "Hyper Regeneration!";
         }
         protected override string GetDescription()
         {
-            // partial stats here
-            return "<i>\"DON'T YOU DARE DIE ON ME!!\"</i>\n<color=green>Flat +250 HP</color>";
+            return "<i>\"You should've gone for the head... or one-shot kill.\"";
         }
         protected override GameObject GetCardArt()
         {
-            return null;
-            //return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_HollowLife");
+            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_HyperRegeneration");
         }
         protected override CardInfo.Rarity GetRarity()
         {
@@ -62,16 +60,30 @@ namespace GearUpCards.Cards
             {
                 new CardInfoStat()
                 {
+                    positive = true,
+                    stat = "Flat Regen",
+                    amount = "+25 /s",
+                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
+                },
+                new CardInfoStat()
+                {
+                    positive = true,
+                    stat = "HP Regen",
+                    amount = "+0.5% /s",
+                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
+                },
+                new CardInfoStat()
+                {
                     positive = false,
-                    stat = "Heal Effects",
-                    amount = "-10%",
+                    stat = "HP Cap",
+                    amount = "-15%",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 }
             };
         }
         protected override CardThemeColor.CardThemeColorType GetTheme()
         {
-            return CardThemeColor.CardThemeColorType.NatureBrown;
+            return CardThemeColor.CardThemeColorType.PoisonGreen;
         }
         public override string GetModName()
         {
@@ -79,7 +91,7 @@ namespace GearUpCards.Cards
         }
         public override void Callback()
         {
-            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Emergency\nHealth";
+            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Health\nPassive";
         }
     }
 }

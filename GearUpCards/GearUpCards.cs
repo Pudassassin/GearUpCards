@@ -47,7 +47,7 @@ namespace GearUpCards
     {
         public const string ModId = "com.pudassassin.rounds.GearUpCards";
         public const string ModName = "GearUpCards";
-        public const string Version = "0.4.3.19"; //build #278 / Release 0-5-0
+        public const string Version = "0.4.3.36"; //build #296  / Release 0-5-0
 
         public const string ModInitials = "GearUP";
 
@@ -142,8 +142,10 @@ namespace GearUpCards
             CustomCard.BuildCard<BulletsDotRarCard>();
             CustomCard.BuildCard<DesolationCard>();
 
-            CustomCard.BuildCard<MedicCheckup>();
-            CustomCard.BuildCard<HyperRegeneration>();
+            CustomCard.BuildCard<MedicCheckupCard>();
+            CustomCard.BuildCard<HyperRegenerationCard>();
+
+            CustomCard.BuildCard<ArcaneConversionCard>();
 
             // Bounty system card
             // CustomCard.BuildCard<SheriffCard>();
@@ -193,6 +195,7 @@ namespace GearUpCards
             CustomCard.BuildCard<PotencyGlyphCard>();
             CustomCard.BuildCard<TimeGlyphCard>();
             CustomCard.BuildCard<ReplicationGlyphCard>();
+            CustomCard.BuildCard<ProtectionGlyphCard>();
 
             // Booster Packs
             CustomCard.BuildCard<VeteransFriendCard>();
@@ -311,6 +314,15 @@ namespace GearUpCards
                     newList.Add(GearCategory.typeUniqueGunSpread);
                     otherCard.categories = newList.ToArray();
                 }
+
+                // Vs other 'Piercing' damage card
+                MakeExclusive("Arcane Conversion", "Piercing Bullets");
+                MakeExclusive("Arcane Conversion", "Anonymity");
+
+                // MakeExclusive("Arcane Conversion", "Gamer Ammunition");
+                // MakeExclusive("Arcane Conversion", "Armor-Piercing Rounds");
+                // MakeExclusive("Arcane Conversion", "Shadow Bullets");
+
             });
 
             // initialize card categories
@@ -515,10 +527,10 @@ namespace GearUpCards
                 isCardExtraDrawPhase = false;
                 Miscs.Log("[GearUpCard] Late Extra draw unlocked");
 
-                // post card-phase code here
-                GearUpPreRoundEffects.TriggerStatsMods();
-
             }
+
+            // post card-phase code here
+            GearUpPreRoundEffects.TriggerStatsMods();
 
             yield break;
         }

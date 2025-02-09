@@ -77,6 +77,9 @@ namespace GearUpCards.MonoBehaviours
         internal Player player;
         internal CharacterStatModifiers stats;
 
+        internal bool fullArcane = false;
+        internal int damageID = -1;
+
         /* DEBUG */
         internal int proc_count = 0;
 
@@ -194,19 +197,19 @@ namespace GearUpCards.MonoBehaviours
 
                     // get and arrange target priority
                     visibleTargets.Clear();
-                    foreach (Player item in playerDistancePairs.Keys)
+                    foreach (Player enemy in playerDistancePairs.Keys)
                     {
-                        if (playerDistancePairs[item] < 0.0f) continue;
+                        if (playerDistancePairs[enemy] < 0.0f) continue;
 
                         int index;
                         for (index = 0; index < visibleTargets.Count; index++)
                         {
-                            if (playerDistancePairs[visibleTargets[index]] > playerDistancePairs[item])
+                            if (playerDistancePairs[visibleTargets[index]] > playerDistancePairs[enemy])
                             {
                                 break;
                             }
                         }
-                        visibleTargets.Insert(index, item);
+                        visibleTargets.Insert(index, enemy);
                     }
 
                     // lock on targets
@@ -221,22 +224,38 @@ namespace GearUpCards.MonoBehaviours
 
                     // apply debuff and deal damage
                     float rateMul = maxTargets / (float)lockedOnTargets.Count;
-                    foreach (Player item in lockedOnTargets)
+                    foreach (Player target in lockedOnTargets)
                     {
-                        arcaneSunStatus = item.gameObject.GetOrAddComponent<ArcaneSunStatus>();
-                        arcaneSunStatus.ApplyEffect(damageAmp, rampUpRate * rateMul * procTickTime, debuffRetainTime, debuffDecayRate);
-                        
-                        float damage = (damageFlat + (damagePercent * item.data.maxHealth)) * (arcaneSunStatus.GetEffectCharge() + preCharge) * procTickTime;
+                        CharacterStatModifiers targetStats = target.gameObject.GetComponent<CharacterStatModifiers>();
+                        int protectionLvl = targetStats.GetGearData().glyphProtection;
 
-                        // item.data.health -= damage * hpDrainFactor;
-                        item.data.healthHandler.Heal(-(damage * hpDrainFactor));
-                        item.data.healthHandler.RPCA_SendTakeDamage(new Vector2(damage * damageFactor, 0.0f), item.transform.position, playerID: player.playerID);
+                        // effect : damage ramp up and amps
+                        arcaneSunStatus = target.gameObject.GetOrAddComponent<ArcaneSunStatus>();
+                        if (protectionLvl > 0)
+                        {
+                            float protectMul = Mathf.Pow(0.90f, protectionLvl);
+                            arcaneSunStatus.ApplyEffect(damageAmp, rampUpRate * rateMul * protectMul * procTickTime, debuffRetainTime, debuffDecayRate);
+                        }
+                        else
+                        {
+                            arcaneSunStatus.ApplyEffect(damageAmp, rampUpRate * rateMul * procTickTime, debuffRetainTime, debuffDecayRate);
+                        }
+
+                        // damage dealing part
+                        float damage = (damageFlat + (damagePercent * target.data.maxHealth)) * (arcaneSunStatus.GetEffectCharge() + preCharge) * procTickTime;
+                        if (protectionLvl > 0)
+                        {
+                            damage *= Mathf.Pow(0.85f, protectionLvl);
+                        }
+
+                        target.data.healthHandler.Heal(-(damage * hpDrainFactor));
+                        target.data.healthHandler.RPCA_SendTakeDamage(new Vector2(damage * damageFactor, 0.0f), target.transform.position, playerID: damageID);
 
                         // beam visual
                         float rayWidth = Mathf.Clamp(1.0f + (arcaneSunStatus.GetEffectCharge() / 5.0f), 1.0f, 4.0f);
 
-                        rayPlayerPairs[item].SetActive(true);
-                        rayPlayerPairs[item].GetComponent<RayVFXMono>().SetBeamWidth(rayWidth);
+                        rayPlayerPairs[target].SetActive(true);
+                        rayPlayerPairs[target].GetComponent<RayVFXMono>().SetBeamWidth(rayWidth);
                     }
                     
                     procTimer -= procTickTime;
@@ -276,6 +295,19 @@ namespace GearUpCards.MonoBehaviours
             debuffDecayRate     = Mathf.Max(0.5f, debuffDecayRate);
 
             effectRadius    = effectRadiusBase + (effectRadiusScaling * (glyphDivination + glyphInfluence));
+
+            if (stats.GetGearData().arcaneConversionStack > 0)
+            {
+                fullArcane = true;
+                hpDrainFactor = 0.99f;
+                damageID = -1;
+            }
+            else
+            {
+                fullArcane = false;
+                hpDrainFactor = 0.5f;
+                damageID = player.playerID;
+            }
 
             arcaneSunObject.SetActive(true);
             effectEnabled = true;

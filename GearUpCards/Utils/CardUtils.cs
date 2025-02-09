@@ -51,6 +51,7 @@ namespace GearUpCards.Utils
             public static CardCategory tagNoGlitch = CustomCardCategories.instance.CardCategory("NoRandom");
             public static CardCategory tagNoRemove = CustomCardCategories.instance.CardCategory("NoRemove");
             public static CardCategory tagNoTableFlip = CustomCardCategories.instance.CardCategory("NoFlip");
+            public static CardCategory tagNoEternity = CustomCardCategories.instance.CardCategory("cantEternity");
 
 
             public static CardCategory tagSpellOnlyAugment = CustomCardCategories.instance.CardCategory("GearUp_Spell-Only-Augment");
@@ -425,6 +426,7 @@ namespace GearUpCards.Utils
             "Potency Glyph",
             "Time Glyph",
             "Replication Glyph",
+            "Protection Glyph",
 
             // C&C cards
             "Tiberium Bullet",
@@ -458,7 +460,8 @@ namespace GearUpCards.Utils
             "Magick Fragments",
             "Potency Glyph",
             "Time Glyph",
-            "Replication Glyph"
+            "Replication Glyph",
+            "Protection Glyph"
         };
 
         public static List<string> cardListVanillaBlocks = new List<string>()
@@ -489,6 +492,7 @@ namespace GearUpCards.Utils
             "GearUP@Tactical Scanner",
             "GearUP@Desolation",
             "GearUP@Rolling Borbwark",
+            "GearUP@Protection Glyph",
 
             // Willis' Cards Plus - Cards+
             "Cards+@Turtle",
@@ -622,7 +626,7 @@ namespace GearUpCards.Utils
 
             tempModifier += gearData.glyphDivination * 2.00f;
             tempModifier += gearData.glyphGeometric * 0.50f;
-            tempModifier += gearData.glyphInfluence * 1.00f;
+            tempModifier += gearData.glyphInfluence * 2.50f;
             tempModifier += gearData.glyphPotency * 0.50f;
             tempModifier += gearData.glyphMagickFragment * 0.75f;
             tempModifier += gearData.glyphTime * 0.50f;

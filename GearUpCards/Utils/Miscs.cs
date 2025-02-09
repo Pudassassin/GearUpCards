@@ -16,6 +16,7 @@ namespace GearUpCards.Utils
     {
         public static bool debugFlag = true;
 
+		// Debug logs
 		public static void LogInfo(object message)
         {
 			UnityEngine.Debug.Log(message);
@@ -27,7 +28,6 @@ namespace GearUpCards.Utils
                 UnityEngine.Debug.Log(message);
             }
         }
-
         public static void LogWarn(object message)
         {
             if (debugFlag)
@@ -35,7 +35,6 @@ namespace GearUpCards.Utils
                 UnityEngine.Debug.LogWarning(message);
             }
         }
-
         public static void LogError(object message)
         {
             if (debugFlag)
@@ -43,6 +42,12 @@ namespace GearUpCards.Utils
                 UnityEngine.Debug.LogError(message);
             }
         }
+
+		// get the 'time flow' speed
+		public static float TimeSpeedCalc(float durationFrom, float durationInto)
+		{
+			return durationFrom / durationInto;
+		}
 
 		// Vector Utils
 		public static Vector3 RotateVector(Vector3 vector, float degree)

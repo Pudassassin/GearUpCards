@@ -25,7 +25,8 @@ namespace GearUpCards.Cards
             cardInfo.categories = new CardCategory[]
             {
                 GearCategory.typeCadModule,
-                GearCategory.tagNoGlitch
+                GearCategory.tagNoGlitch,
+                GearCategory.tagNoEternity
             };
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
@@ -60,7 +61,7 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "Glyphs give <color=green>TWICE</color> the effect to your gun and block and let you find Glyphs easier.\nPick <color=green>a free</color> <color=#2CADFFff>Uncommon</color> or lower Glyph.";
+            return "Glyphs give <color=green>+50%</color> bonus to your gun and block and let you find Glyphs easier.\nPick <color=green>a free</color> <color=#2CADFFff>Uncommon</color> or lower Glyph.";
         }
         protected override GameObject GetCardArt()
         {
@@ -81,20 +82,6 @@ namespace GearUpCards.Cards
                 //     amount = "+4",
                 //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 // },
-                // new CardInfoStat()
-                // {
-                //     positive = false,
-                //     stat = "Spread",
-                //     amount = "+60 deg",
-                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                // },
-                // new CardInfoStat()
-                // {
-                //     positive = true,
-                //     stat = "Glyph",
-                //     amount = "+1",
-                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                // }
             };
         }
         protected override CardThemeColor.CardThemeColorType GetTheme()

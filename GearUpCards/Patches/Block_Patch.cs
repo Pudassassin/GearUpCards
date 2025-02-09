@@ -12,11 +12,11 @@ namespace GearUpCards.Patches
         [HarmonyPostfix]
         [HarmonyPatch(nameof(Block.IsBlocking))]
         [HarmonyPriority(Priority.Last)]
-        static void Block_RemoveIFrame(Block __instance, ref bool __result, CharacterData ___data)
+        static void Block_ModifyIFrame(Block __instance, ref bool __result, CharacterData ___data)
         {
             float factor = 1.0f;
 
-            BlockStatus status = ___data.player.GetComponent<BlockStatus>();
+            DesolationStatus status = ___data.player.GetComponent<DesolationStatus>();
             if (status != null)
             {
                 factor *= status.GetBlockIFrameMultiplier();
@@ -26,7 +26,7 @@ namespace GearUpCards.Patches
             {
                 __result = false;
             }
-
+            // other cases are to be implemented and used
         }
     }
 }

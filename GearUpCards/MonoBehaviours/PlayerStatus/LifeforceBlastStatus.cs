@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using UnboundLib;
 using UnboundLib.GameModes;
 using UnityEngine;
 
@@ -50,6 +51,20 @@ namespace GearUpCards.MonoBehaviours
                 healModifierFactor = factor;
                 effectDuration = duration;
                 isFriendly = friendly;
+            }
+
+            // Update Status UI
+            StatusUIMono statusUI = gameObject.GetOrAddComponent<StatusUIMono>();
+            
+            if (isFriendly)
+            {
+                statusUI.SetIcon(StatusUIMono.StatusID.HealUp, true);
+                statusUI.SetIcon(StatusUIMono.StatusID.HealDown, false);
+            }
+            else
+            {
+                statusUI.SetIcon(StatusUIMono.StatusID.HealUp, false);
+                statusUI.SetIcon(StatusUIMono.StatusID.HealDown, true);
             }
         }
 
@@ -112,7 +127,7 @@ namespace GearUpCards.MonoBehaviours
                 shape = healHinderPart.shape;
             }
 
-            shape.scale = player.transform.localScale * 1.25f;
+            shape.scale = Vector3.one + player.transform.localScale * 0.25f;
 
 
             if (effectTimer > effectDuration)
@@ -123,6 +138,9 @@ namespace GearUpCards.MonoBehaviours
 
         private void PurgeStatus()
         {
+            // clean up code
+
+            // visual and VFX
             if (healBoostObj != null)
             {
                 Destroy(healBoostObj);
@@ -132,6 +150,18 @@ namespace GearUpCards.MonoBehaviours
                 Destroy(healHinderObj);
             }
 
+            // Update Status UI
+            StatusUIMono statusUI = gameObject.GetComponent<StatusUIMono>();
+            if (isFriendly)
+            {
+                statusUI.SetIcon(StatusUIMono.StatusID.HealUp, false);
+            }
+            else
+            {
+                statusUI.SetIcon(StatusUIMono.StatusID.HealDown, false);
+            }
+
+            // unhook events
             GameModeManager.RemoveHook(GameModeHooks.HookPointEnd, OnPointEnd);
             GameModeManager.RemoveHook(GameModeHooks.HookPointStart, OnPointEnd);
 

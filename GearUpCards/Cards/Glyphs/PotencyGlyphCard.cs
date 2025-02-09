@@ -41,7 +41,7 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "Your Bullets hurts more and your Spells become more powerful!";
+            return "Bullets hurts more and Spells become more powerful!";
         }
         protected override GameObject GetCardArt()
         {

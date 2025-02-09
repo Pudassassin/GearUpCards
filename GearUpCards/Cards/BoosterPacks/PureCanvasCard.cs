@@ -27,7 +27,8 @@ namespace GearUpCards.Cards
                 GearCategory.tagNoGlitch,
                 GearCategory.tagNoRemove,
                 GearCategory.tagNoTableFlip,
-                GearCategory.tagCardManipulation
+                GearCategory.tagCardManipulation,
+                GearCategory.tagNoEternity
             };
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)

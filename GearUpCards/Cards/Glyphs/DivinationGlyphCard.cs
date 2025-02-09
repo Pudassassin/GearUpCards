@@ -55,7 +55,7 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "Your Bullets and Spells reach a little further AND quicker!";
+            return "Bullets and Spells reach a little further AND quicker!";
         }
         protected override GameObject GetCardArt()
         {
@@ -81,13 +81,6 @@ namespace GearUpCards.Cards
                     positive = true,
                     stat = "Projectile Speed",
                     amount = "+15%",
-                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                },
-                new CardInfoStat()
-                {
-                    positive = true,
-                    stat = "Orb Trajectory",
-                    amount = "Improved",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 },
                 new CardInfoStat()

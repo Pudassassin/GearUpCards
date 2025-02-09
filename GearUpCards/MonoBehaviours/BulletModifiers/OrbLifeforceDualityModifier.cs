@@ -46,6 +46,8 @@ namespace GearUpCards.MonoBehaviours
         internal float orbAliveTime = 0.0f;
         internal bool effectEnable = false;
 
+        internal bool fullArcane = false;
+
         public void Setup()
         {
             projectileHit = transform.root.GetComponentInParent<ProjectileHit>();
@@ -74,6 +76,11 @@ namespace GearUpCards.MonoBehaviours
 
             transform.root.GetComponent<RemoveAfterSeconds>().seconds = orbMaxDuration + 2.5f;
             procTimer = procTickTime;
+
+            if (casterPlayer.gameObject.GetComponent<CharacterStatModifiers>().GetGearData().arcaneConversionStack > 0)
+            {
+                fullArcane = true;
+            }
 
             // visuals
             orbObject = Instantiate(vfxOrb, transform.root);
@@ -178,56 +185,68 @@ namespace GearUpCards.MonoBehaviours
                     Vector2 orbPosition = new Vector2(transform.root.position.x, transform.root.position.y);
                     proxyPlayerCount = 0;
 
-                    foreach (Player item in beamPlayerPairs.Keys)
+                    foreach (Player target in beamPlayerPairs.Keys)
                     {
                         linkFlag = true;
 
-                        if (!item.gameObject.activeInHierarchy || item.data.healthHandler.isRespawning)
+                        if (!target.gameObject.activeInHierarchy || target.data.healthHandler.isRespawning)
                         {
                             // either dead or reviving, unlink it
                             linkFlag = false;
                         }
 
-                        distance = (item.gameObject.transform.position - transform.root.position).magnitude;
+                        distance = (target.gameObject.transform.position - transform.root.position).magnitude;
                         if (distance > effectRadius)
                         {
                             // ...out of range
                             linkFlag = false;
                         }
 
-                        if (PlayerManager.instance.CanSeePlayer(orbPosition, item).canSee == false)
+                        if (PlayerManager.instance.CanSeePlayer(orbPosition, target).canSee == false)
                         {
                             // ...not in line of sight
                             linkFlag = false;
                         }
 
-                        beamPlayerPairs[item].SetActive(linkFlag);
+                        beamPlayerPairs[target].SetActive(linkFlag);
 
                         if (linkFlag)
                         {
                             proxyPlayerCount++;
 
-                            if (item.teamID == casterPlayer.teamID)
+                            if (target.teamID == casterPlayer.teamID)
                             {
                                 // Heal friends
                                 orbLifeTime -= procTickTime;
-                                float healAmount = (healFlatRate + (item.data.maxHealth * healPercentRate)) * procTickTime;
-                                item.data.healthHandler.Heal(healAmount);
+                                float healAmount = (healFlatRate + (target.data.maxHealth * healPercentRate)) * procTickTime;
+                                target.data.healthHandler.Heal(healAmount);
                             }
                             else
                             {
+                                CharacterStatModifiers stats = target.gameObject.GetComponent<CharacterStatModifiers>();
+                                int protectionLvl = stats.GetGearData().glyphProtection;
+
                                 // drain enemies' lives
                                 orbLifeTime += procTickTime * 0.25f;
-                                float drainAmount = (drainFlatRate + (item.data.maxHealth * drainPercentRate)) * procTickTime;
-                                // item.data.health -= drainAmount * 0.5f;
-                                item.data.healthHandler.Heal(-drainAmount * 0.5f);
-                                item.data.healthHandler.RPCA_SendTakeDamage(new Vector2(drainAmount * 0.5f, 0.0f), this.transform.position, playerID: casterPlayer.playerID);
+                                float drainAmount = (drainFlatRate + (target.data.maxHealth * drainPercentRate)) * procTickTime;
+
+                                if (protectionLvl > 0)
+                                {
+                                    drainAmount *= Mathf.Pow(0.85f, protectionLvl);
+                                }
+
+                                if (fullArcane)
+                                {
+                                    target.data.healthHandler.Heal(-drainAmount);
+                                    target.data.healthHandler.RPCA_SendTakeDamage(new Vector2(0.05f, 0.0f), target.transform.position);
+                                }
+                                else
+                                {
+                                    target.data.healthHandler.Heal(-drainAmount * 0.5f);
+                                    target.data.healthHandler.RPCA_SendTakeDamage(new Vector2(drainAmount * 0.5f, 0.0f), target.transform.position, playerID: casterPlayer.playerID);
+                                }
                             }
                         }
-                        // else
-                        // {
-                        // 
-                        // }
                     }
 
                     procTimer -= procTickTime;

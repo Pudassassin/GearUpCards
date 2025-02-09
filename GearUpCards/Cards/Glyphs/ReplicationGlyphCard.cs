@@ -65,7 +65,7 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "You fire more bullets and conjure more spell projectiles at once, and these extras are exact copies!";
+            return "Fire more copies of bullets and spell projectiles at once!";
         }
         protected override GameObject GetCardArt()
         {

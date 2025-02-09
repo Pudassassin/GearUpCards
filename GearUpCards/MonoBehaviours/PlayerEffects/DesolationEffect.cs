@@ -268,8 +268,8 @@ namespace GearUpCards.MonoBehaviours
 
                 // UnityEngine.Debug.Log($"[AntiBullet] Reading player[{target.playerID}]");
 
-                BlockStatus debuff = target.gameObject.GetOrAddComponent<BlockStatus>();
-                debuff.ApplyEffect(0.0f, abilityDuration, false);
+                DesolationStatus debuff = target.gameObject.GetOrAddComponent<DesolationStatus>();
+                debuff.ApplyEffect(0.0f, 0.25f, abilityDuration);
 
                 // UnityEngine.Debug.Log($"[AntiBullet] Forced-Reload player[{target.playerID}]");
 

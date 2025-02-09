@@ -27,7 +27,8 @@ namespace GearUpCards.Cards
                 GearCategory.tagNoGlitch,
                 GearCategory.tagNoRemove,
                 GearCategory.tagNoTableFlip,
-                GearCategory.tagCardManipulation
+                GearCategory.tagCardManipulation,
+                GearCategory.tagNoEternity
             };
 
             // gun.attackSpeed = 1.0f / 1.20f;

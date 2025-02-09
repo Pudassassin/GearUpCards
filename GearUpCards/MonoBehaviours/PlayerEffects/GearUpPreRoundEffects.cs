@@ -28,21 +28,30 @@ namespace GearUpCards.MonoBehaviours
         // private static GameObject empowerShotVFX = GearUpCards.VFXBundle.LoadAsset<GameObject>("VFX_EmpowerShot");
         // internal bool addShotVFX = false;
 
+        // actual stats gains that require unorthodox implementation
+        private float glyphMagickFragment_BlockIFrameMul = 0.65f;
+        private float glyphMagickFragment_EchoTimeAdd = -0.05f;
+
+        private float glyphProtection_EchoTimeAdd = 0.025f;
+        private float glyphProtection_MinBlockCD = 0.15f;
+        private float glyphProtection_BlockIFrameMul = 1.35f;
+        private float glyphProtection_BlockIFrameMul_CAD = 1.20f;
+
         // extra bonus granted by Glyph CAD Module, may differ from actual card bonus for balancing reason
-        private const float glyphDivinationProjectileSpeed = 1.10f;
-        private const float glyphDivinationProjectileSimSpeed = 1.10f;
+        private const float glyphDivination_ProjSpeed = 1.065f;
+        private const float glyphDivination_ProjSimSpeed = 1.065f;
 
-        private const int glyphGeometricGunReflect = 3;
+        private const int glyphGeometric_GunReflect = 2;
 
-        private const float glyphMagickFragmentBlockCooldownAdd = -0.1f;
-        private const float glyphMagickFragment_BlockCdMul = 0.75f;
+        private const float glyphMagickFragment_BlockCDAdd = -0.1f;
+        private const float glyphMagickFragment_BlockCDMul = 0.9f;
 
-        private const float glyphPotencyDamage = 1.35f;
+        private const float glyphPotency_Damage = 1.167f;
 
-        private const float glyphTimeGunDragMul = 0.80f;
-        private const float glyphTimeGunLifetimeMul = 1.35f;
+        private const float glyphTime_GunDragMul = 0.833f;
+        private const float glyphTime_GunLifetimeMul = 1.167f;
         
-        private const int glyphReplicationProjectiles = 2;
+        private const int glyphReplication_Projectiles = 1;
 
         // internals
         private const float procTickTime = .10f;
@@ -51,6 +60,8 @@ namespace GearUpCards.MonoBehaviours
         internal bool effectEnabled = false;
         // internal int proc_count = 0;
 
+        internal Action<BlockTrigger.BlockTriggerType> blockAction;
+
         internal Player player;
         internal Gun gun;
         internal GunAmmo gunAmmo;
@@ -58,6 +69,15 @@ namespace GearUpCards.MonoBehaviours
         internal CharacterStatModifiers stats;
         internal HealthHandler healthHandler;
         internal HollowLifeEffect hollowLifeEffect;
+
+        // involving echo speed and IFrame duration
+        public int glyphMagickFragment = 0;
+        public int glyphProtection = 0;
+        public float IFrameMul = 1.0f;
+        public float timespeedDif;
+
+        private float minBlockCDTime = 0.0f;
+        private float minBlockCDcounter = 0.0f;
 
         // stats deltas -- for [Glyph CAD Module]
         public bool playerHas_GlyphCAD = false;
@@ -83,6 +103,10 @@ namespace GearUpCards.MonoBehaviours
         public float statsDelta_GunDamage_MUL_2 = 1.0f;
         public int statsDelta_GunNumProjectile_ADD_2 = 0;
         public float statsDelta_GunBurstTime_ADD_2 = 0.0f;
+
+        // stats deltas 3 concerning other stats
+        public float statsDelta_TimeBetweenBlock_ADD = 0.0f;
+
 
         // stats deltas omega -- live update stats
 
@@ -129,7 +153,8 @@ namespace GearUpCards.MonoBehaviours
 
         public void Start()
         {
-
+            this.blockAction = new Action<BlockTrigger.BlockTriggerType>(this.GetDoBlockAction(this.player, this.block).Invoke);
+            this.block.BlockAction = (Action<BlockTrigger.BlockTriggerType>)Delegate.Combine(this.block.BlockAction, this.blockAction);
         }
 
         public void Update()
@@ -160,6 +185,32 @@ namespace GearUpCards.MonoBehaviours
 
                     procTimer -= procTickTime;
                     // proc_count++;
+                }
+
+                // IFrameMul = 1.0f;
+                if (glyphProtection > 0 || glyphMagickFragment > 0)
+                {
+                    // IFrameMul *= Mathf.Pow(glyphMagickFragment_BlockIFrameMul, glyphMagickFragment);
+                    // IFrameMul *= Mathf.Pow(glyphProtection_BlockIFrameMul, glyphProtection);
+                    // 
+                    // if (playerHas_GlyphCAD)
+                    // {
+                    //     IFrameMul *= Mathf.Pow(glyphProtection_BlockIFrameMul_CAD, glyphProtection);
+                    // }
+                    // 
+                    // IFrameMul = Mathf.Clamp(IFrameMul, 0.25f, 3.0f);
+
+                    var blockPartMain = block.particle.main;
+                    blockPartMain.simulationSpeed = 1.0f / IFrameMul;
+                
+                    timespeedDif = TimeHandler.deltaTime * (Miscs.TimeSpeedCalc(1.0f, IFrameMul) - 1.0f);
+                    block.sinceBlock += timespeedDif;
+                }
+
+                if (minBlockCDcounter > 0)
+                {
+                    block.counter = 0.0f;
+                    minBlockCDcounter -= TimeHandler.deltaTime;
                 }
             }
 
@@ -259,7 +310,18 @@ namespace GearUpCards.MonoBehaviours
                 statsDelta_GunLifetime_MUL = 1.0f;
             }
 
-            Miscs.Log("[GearUp] UndoStatsChange() applied");
+            if (glyphProtection > 0 || glyphMagickFragment > 0)
+            {
+                float echoTime = (float) Traverse.Create(block).Field("timeBetweenBlocks").GetValue();
+                echoTime -= statsDelta_TimeBetweenBlock_ADD;
+                Traverse.Create(block).Field("timeBetweenBlocks").SetValue((float)echoTime);
+
+                statsDelta_TimeBetweenBlock_ADD = 0.0f;
+            }
+
+            IFrameMul = 1.0f;
+
+            Miscs.Log("[GearUp] UndoStatsChange()");
         }
 
         // private void RestorePlayerStats()
@@ -283,7 +345,7 @@ namespace GearUpCards.MonoBehaviours
         //     // gun.numberOfProjectiles = prevGunProjCount;
         // }
 
-        internal void ApplyGlyphCADModuleEffect()
+        private void ApplyGlyphCADModuleEffect()
         {
             if (playerHas_GlyphCAD)
             {
@@ -303,18 +365,18 @@ namespace GearUpCards.MonoBehaviours
             // modify and save delta's
 
             // Divination Glyph
-            statsDelta_GunProjSpeed_MUL = Mathf.Pow(glyphDivinationProjectileSpeed, glyphDivination);
+            statsDelta_GunProjSpeed_MUL = Mathf.Pow(glyphDivination_ProjSpeed, glyphDivination);
             gun.projectileSpeed *= statsDelta_GunProjSpeed_MUL;
 
-            statsDelta_GunProjSim_MUL = Mathf.Pow(glyphDivinationProjectileSimSpeed, glyphDivination);
+            statsDelta_GunProjSim_MUL = Mathf.Pow(glyphDivination_ProjSimSpeed, glyphDivination);
             gun.projectielSimulatonSpeed *= statsDelta_GunProjSim_MUL;
 
             // Geometric Glyph
-            statsDelta_GunReflect_ADD = glyphGeometricGunReflect * glyphGeometric;
+            statsDelta_GunReflect_ADD = glyphGeometric_GunReflect * glyphGeometric;
             gun.reflects += statsDelta_GunReflect_ADD;
 
             // Magick Fragment
-            statsDelta_BlockCdAdd_ADD = glyphMagickFragmentBlockCooldownAdd * magickFragment;
+            statsDelta_BlockCdAdd_ADD = glyphMagickFragment_BlockCDAdd * magickFragment;
             block.cdAdd += statsDelta_BlockCdAdd_ADD;
 
             statsDelta_BlockCdMul_ADD = 0.0f;
@@ -324,18 +386,18 @@ namespace GearUpCards.MonoBehaviours
             {
                 if (block.cdMultiplier >= 1.25f)
                 {
-                    statsDelta_BlockCdMul_ADD -= (1.0f - glyphMagickFragment_BlockCdMul);
-                    block.cdMultiplier -= (1.0f - glyphMagickFragment_BlockCdMul);
+                    statsDelta_BlockCdMul_ADD -= (1.0f - glyphMagickFragment_BlockCDMul);
+                    block.cdMultiplier -= (1.0f - glyphMagickFragment_BlockCDMul);
                 }
                 else
                 {
-                    statsDelta_BlockCdMul_MUL *= glyphMagickFragment_BlockCdMul;
-                    block.cdMultiplier *= glyphMagickFragment_BlockCdMul;
+                    statsDelta_BlockCdMul_MUL *= glyphMagickFragment_BlockCDMul;
+                    block.cdMultiplier *= glyphMagickFragment_BlockCDMul;
                 }
             }
 
             // Potency Glyph
-            statsDelta_GunDamage_MUL = Mathf.Pow(glyphPotencyDamage, glpyhPotency);
+            statsDelta_GunDamage_MUL = Mathf.Pow(glyphPotency_Damage, glpyhPotency);
             gun.damage *= statsDelta_GunDamage_MUL;
 
             // Time Glyph
@@ -346,18 +408,18 @@ namespace GearUpCards.MonoBehaviours
             {
                 if (gun.destroyBulletAfter > 0.0f)
                 {
-                    statsDelta_GunLifetime_MUL *= glyphTimeGunLifetimeMul;
-                    gun.destroyBulletAfter *= glyphTimeGunLifetimeMul;
+                    statsDelta_GunLifetime_MUL *= glyphTime_GunLifetimeMul;
+                    gun.destroyBulletAfter *= glyphTime_GunLifetimeMul;
                 }
                 if (gun.drag > 0.0f)
                 {
-                    statsDelta_GunDrag_MUL *= glyphTimeGunDragMul;
-                    gun.drag *= glyphTimeGunDragMul;
+                    statsDelta_GunDrag_MUL *= glyphTime_GunDragMul;
+                    gun.drag *= glyphTime_GunDragMul;
                 }
             }
 
             // Replication Glyph
-            statsDelta_GunNumProjectile_ADD = glyphReplication * glyphReplicationProjectiles;
+            statsDelta_GunNumProjectile_ADD = glyphReplication * glyphReplication_Projectiles;
             gun.numberOfProjectiles += statsDelta_GunNumProjectile_ADD;
 
             Miscs.Log("[GearUp] ApplyGlyphCADModuleEffect() applied");
@@ -404,6 +466,8 @@ namespace GearUpCards.MonoBehaviours
 
         private void ApplyStatsMods()
         {
+            Miscs.Log($"[GearUp] ApplyStatsMods()");
+
             if (this.stats.GetGearData().addOnList.Contains(GearUpConstants.AddOnType.cadModuleGlyph))
             {
                 ApplyGlyphCADModuleEffect();
@@ -413,17 +477,71 @@ namespace GearUpCards.MonoBehaviours
             {
                 ApplyBulletsDotRar();
             }
+
+            IFrameMul = 1.0f;
+            glyphProtection = stats.GetGearData().glyphProtection;
+            glyphMagickFragment = stats.GetGearData().glyphMagickFragment;
+            minBlockCDTime = glyphProtection * glyphProtection_MinBlockCD;
+
+            // Miscs.Log($"[GearUp] ApplyStatsMods()::glyphProtection = {glyphProtection}");
+            // Miscs.Log($"[GearUp] ApplyStatsMods()::glyphMagickFragment = {glyphMagickFragment}");
+
+            if (glyphProtection > 0 || glyphMagickFragment > 0)
+            {
+                // Miscs.Log($"[GearUp] ApplyStatsMods() - dealing with IFrame");
+
+                IFrameMul *= Mathf.Pow(glyphMagickFragment_BlockIFrameMul, glyphMagickFragment);
+                IFrameMul *= Mathf.Pow(glyphProtection_BlockIFrameMul, glyphProtection);
+
+                if (playerHas_GlyphCAD)
+                {
+                    IFrameMul *= Mathf.Pow(glyphProtection_BlockIFrameMul_CAD, glyphProtection);
+                }
+
+                IFrameMul = Mathf.Clamp(IFrameMul, 0.25f, 3.0f);
+
+                // Miscs.Log($"[GearUp] ApplyStatsMods() - dealing with echo time");
+
+                float oldValue = (float)Traverse.Create(block).Field("timeBetweenBlocks").GetValue();
+                float newValue = oldValue;
+
+                newValue += glyphMagickFragment_EchoTimeAdd * ((float)glyphMagickFragment);
+                newValue += glyphProtection_EchoTimeAdd * ((float)glyphProtection);
+
+                newValue = Mathf.Clamp(newValue, 0.05f, 0.5f);
+
+                Traverse.Create(block).Field("timeBetweenBlocks").SetValue((float)newValue);
+                statsDelta_TimeBetweenBlock_ADD = newValue - oldValue;
+
+                // Miscs.Log($"{newValue} - {oldValue} = {newValue - oldValue}");
+            }
+        }
+
+        // Block action
+        public Action<BlockTrigger.BlockTriggerType> GetDoBlockAction(Player player, Block block)
+        {
+            return delegate (BlockTrigger.BlockTriggerType trigger)
+            {
+                bool conditionMet = (trigger == BlockTrigger.BlockTriggerType.Default) && (glyphProtection > 0);
+
+                if (conditionMet)
+                {
+                    // block.counter -= glyphProtection_MinBlockCD * glyphProtection;
+                    minBlockCDcounter = minBlockCDTime;
+                }
+            };
         }
 
         // Event methods
-        private IEnumerator OnPickEnd(IGameModeHandler gm)
-        {
-            SavePlayerStats();
 
-            ApplyStatsMods();
-
-            yield break;
-        }
+        // private IEnumerator OnPickEnd(IGameModeHandler gm)
+        // {
+        //     SavePlayerStats();
+        // 
+        //     ApplyStatsMods();
+        // 
+        //     yield break;
+        // }
 
         private IEnumerator OnPickStart(IGameModeHandler gm)
         {
@@ -463,6 +581,8 @@ namespace GearUpCards.MonoBehaviours
         {
             // This effect should persist between rounds, and at 0 stack it should do nothing mechanically
             // UnityEngine.Debug.Log($"Destroying Scanner  [{this.player.playerID}]");
+            UndoStatsChange();
+            Traverse.Create(block).Field("timeBetweenBlocks").SetValue((float)0.2f);
 
             GameModeManager.RemoveHook(GameModeHooks.HookPointStart, OnPointStart);
             GameModeManager.RemoveHook(GameModeHooks.HookPointEnd, OnPointEnd);
@@ -471,6 +591,9 @@ namespace GearUpCards.MonoBehaviours
             GameModeManager.RemoveHook(GameModeHooks.HookPickStart, OnPickStart);
 
             GameModeManager.RemoveHook(GameModeHooks.HookGameStart, OnRematch);
+
+            this.block.BlockAction = (Action<BlockTrigger.BlockTriggerType>)Delegate.Remove(this.block.BlockAction, this.blockAction);
+            instanceList.Remove(this);
         }
     }
 }

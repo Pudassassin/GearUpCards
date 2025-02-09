@@ -28,6 +28,7 @@ namespace GearUpCards.Cards
         {
             data.maxHealth *= 1.25f;
             data.healthHandler.regeneration += 7.5f;
+            characterStats.GetGearData().medicalPartStack += 1;
 
             // GearUpPreRoundEffects mono = player.gameObject.GetOrAddComponent<GearUpPreRoundEffects>();
             // characterStats.GetGearData().hpPercentageRegen += 0.001f;

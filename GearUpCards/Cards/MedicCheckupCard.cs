@@ -1,89 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Text;
+using System.Threading.Tasks;
 using UnboundLib;
 using UnboundLib.Cards;
-using CardChoiceSpawnUniqueCardPatch.CustomCategories;
-
+using ModdingUtils;
 using UnityEngine;
 
 using GearUpCards.MonoBehaviours;
-using GearUpCards.Utils;
 using GearUpCards.Extensions;
 using static GearUpCards.Utils.CardUtils;
 
 namespace GearUpCards.Cards
 {
-    class InfluenceGlyphCard : CustomCard
+    class MedicCheckupCard : CustomCard
     {
         public override void SetupCard(CardInfo cardInfo, Gun gun, ApplyCardStats cardStats, CharacterStatModifiers statModifiers, Block block)
         {
-            // gun.attackSpeed = 1.0f / 0.85f;
-
             cardInfo.categories = new CardCategory[]
             {
-                GearCategory.tagSpellOnlyAugment,
-                GearCategory.typeGlyph
+                GearCategory.noType
             };
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-            // explosive mono stuff
+            data.maxHealth += 250.0f;
 
-            characterStats.GetGearData().glyphInfluence += 1;
+            characterStats.GetGearData().medicCheckupStack += 1;
+
+            // HollowLifeEffect effect = player.gameObject.GetOrAddComponent<HollowLifeEffect>();
+            
         }
         public override void OnRemoveCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
+            // characterStats.GetGearData().hollowLifeStack -= 1; -- no need for this actually
 
+            // UnityEngine.Debug.Log($"[{GearUpCards.ModInitials}][Card] {GetTitle()} has been removed to player {player.playerID}.");
         }
         protected override string GetTitle()
         {
-            return "Influence Glyph";
+            return "Medic!!!";
         }
         protected override string GetDescription()
         {
-            // return "Improve your Spells' range and effect area. Your Bullets cause a small blast on impact.";
-            return "Improve your Spells' range and effect area. Boost Glyphs and Spells draws";
+            // partial stats here
+            return "<i>\"DON'T YOU DARE DIE ON ME!!\"</i>\n<color=green>Flat +250 HP</color>";
         }
         protected override GameObject GetCardArt()
         {
-            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_GlyphInfluence");
+            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_MedicCheckup");
         }
         protected override CardInfo.Rarity GetRarity()
         {
-            return CardInfo.Rarity.Common;
+            return CardInfo.Rarity.Uncommon;
         }
         protected override CardInfoStat[] GetStats()
         {
             return new CardInfoStat[]
             {
-                // new CardInfoStat()
-                // {
-                //     positive = true,
-                //     stat = "Blast DMG",
-                //     amount = "!WIP!",
-                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                // },
-                // new CardInfoStat()
-                // {
-                //     positive = false,
-                //     stat = "ATK SPD",
-                //     amount = "-15%",
-                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                // },
                 new CardInfoStat()
                 {
-                    positive = true,
-                    stat = "Spell Range/AoE",
-                    amount = "Larger",
+                    positive = false,
+                    stat = "Heal Effects",
+                    amount = "-10%",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 }
             };
         }
         protected override CardThemeColor.CardThemeColorType GetTheme()
         {
-            return CardThemeColor.CardThemeColorType.MagicPink;
+            return CardThemeColor.CardThemeColorType.NatureBrown;
         }
         public override string GetModName()
         {
@@ -91,7 +78,7 @@ namespace GearUpCards.Cards
         }
         public override void Callback()
         {
-            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Spell\nGlyph";
+            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Emergency\nHealth";
         }
     }
 }

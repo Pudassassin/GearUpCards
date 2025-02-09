@@ -43,12 +43,11 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "Blocking temporarily strip away enemy block's invulnerability!";
+            return "Blocking strips away enemy block's defense and slow its recharge!";
         }
         protected override GameObject GetCardArt()
         {
-            return null;
-            // return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_TacticalScanner");
+            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_Desolation");
         }
         protected override CardInfo.Rarity GetRarity()
         {

@@ -42,7 +42,7 @@ namespace GearUpCards.Cards
         protected override string GetDescription()
         {
             // return "Summon a mini sun that deals increasing damage to nearby enemy you can see. Also cause them to take more damage from other sources.";
-            return "Gain mini sun that deals ramping damage to nearby enemy in sight and amplify damage they take temporarily.";
+            return "Deals ramping damage to nearby enemy in sight and amplify damage they take temporarily.";
         }
         protected override GameObject GetCardArt()
         {

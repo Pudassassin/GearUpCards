@@ -6,6 +6,8 @@ using UnboundLib;
 
 using GearUpCards.MonoBehaviours;
 using GearUpCards.Extensions;
+using System;
+using ModdingUtils.RoundsEffects;
 // using GearUpCards.Extensions;
 
 namespace GearUpCards.Patches
@@ -13,6 +15,9 @@ namespace GearUpCards.Patches
     [HarmonyPatch(typeof(HealthHandler))]
     class HealthHandler_Patch
     {
+        public static Color arcaneHit_A = new Color(0.9f, 0.7f, 0.9f);
+        public static Color arcaneHit_B = new Color(0.9f, 0.4f, 0.9f);
+
         static float GetHealMultiplier(Player ___player)
         {
             float healMuliplier = 1.0f;
@@ -48,6 +53,7 @@ namespace GearUpCards.Patches
 
         static float GetDamageMultiplier(Player ___player)
         {
+            CharacterStatModifiers stats = ___player.gameObject.GetComponent<CharacterStatModifiers>();
             float damageMuliplier = 1.0f;
             // CharacterStatModifiers stats = ___player.gameObject.GetComponent<CharacterStatModifiers>();
 
@@ -66,7 +72,13 @@ namespace GearUpCards.Patches
             ArcaneSunEffect arcaneSunEffect = ___player.GetComponent<ArcaneSunEffect>();
             if (arcaneSunEffect != null)
             {
-                damageMuliplier *= Mathf.Pow(1.15f, arcaneSunEffect.stackCount);
+                damageMuliplier *= Mathf.Pow(1.10f, arcaneSunEffect.stackCount);
+            }
+
+            int arcaneConversionStack = stats.GetGearData().arcaneConversionStack;
+            if (arcaneConversionStack > 2)
+            {
+                damageMuliplier *= Mathf.Pow(1.35f, arcaneConversionStack - 2);
             }
 
             return damageMuliplier;
@@ -101,6 +113,86 @@ namespace GearUpCards.Patches
 
             ___player.data.health += healAmount;
             return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPriority(int.MaxValue-1)]
+        [HarmonyPatch(methodName: "CallTakeDamage")]
+        // [HarmonyPatch(methodName: "TakeDamage", argumentTypes: new Type[] { typeof(Vector2), typeof(Vector2), typeof(GameObject), typeof(Player), typeof(bool), typeof(bool) })]
+        static void CallTakeDamage_ArcaneConversion(ref Vector2 damage, ref Player damagingPlayer, Player ___player)
+        {
+            if (damagingPlayer == null)
+            {
+                return;
+            }
+
+            CharacterStatModifiers sourceStats = damagingPlayer.gameObject.GetComponent<CharacterStatModifiers>();
+            HealthHandler sourchHealth = damagingPlayer.gameObject.GetComponent<HealthHandler>();
+            int stackCount = sourceStats.GetGearData().arcaneConversionStack;
+
+            HealthHandler targetHealth = ___player.gameObject.GetComponent<HealthHandler>();
+
+            if (stackCount > 0)
+            {
+                Vector2 arcaneDamage = damage;
+                float arcaneLifesteal = 0.0f;
+
+                if (stackCount == 1)
+                {
+                    arcaneDamage *= 0.5f;
+                    damage *= 0.5f;
+
+                    arcaneLifesteal = 0.5f;
+                }
+                else if (stackCount >= 2)
+                {
+                    if (damage.magnitude > 1.0f)
+                    {
+                        damage = damage.normalized;
+                    }
+                    else
+                    {
+                        damage *= 0.1f;
+                    }
+
+                    damagingPlayer = null;
+
+                    arcaneLifesteal = 0.5f;
+                }
+
+                if (stackCount > 2)
+                {
+                    int delta = stackCount - 2;
+                    arcaneDamage *= Mathf.Pow(1.25f, delta);
+                }
+
+                if (sourceStats.lifeSteal > 0.0f)
+                {
+                    float healing = sourceStats.lifeSteal * arcaneLifesteal * arcaneDamage.magnitude;
+                    sourchHealth.Heal(healing);
+                }
+
+                targetHealth.Heal(arcaneDamage.magnitude * -1.0f);
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPriority(Priority.Last)]
+        [HarmonyPatch(methodName: "TakeDamage", argumentTypes: new Type[] { typeof(Vector2), typeof(Vector2), typeof(Color), typeof(GameObject), typeof(Player), typeof(bool), typeof(bool) })]
+        static void TakeDamage_B_ArcaneConversion(ref Color dmgColor, ref Player damagingPlayer)
+        {
+            if (damagingPlayer != null)
+            {
+                CharacterStatModifiers sourceStats = damagingPlayer.gameObject.GetComponent<CharacterStatModifiers>();
+                if (sourceStats.GetGearData().arcaneConversionStack > 0)
+                {
+                    dmgColor = arcaneHit_A;
+                }
+            }
+            else
+            {
+                dmgColor = arcaneHit_B;
+            }
         }
 
         [HarmonyPrefix]

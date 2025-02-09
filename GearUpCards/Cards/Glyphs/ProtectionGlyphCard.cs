@@ -12,43 +12,56 @@ using GearUpCards.MonoBehaviours;
 using GearUpCards.Utils;
 using GearUpCards.Extensions;
 using static GearUpCards.Utils.CardUtils;
+using HarmonyLib;
 
 namespace GearUpCards.Cards
 {
-    class InfluenceGlyphCard : CustomCard
+    class ProtectionGlyphCard : CustomCard
     {
         public override void SetupCard(CardInfo cardInfo, Gun gun, ApplyCardStats cardStats, CharacterStatModifiers statModifiers, Block block)
         {
-            // gun.attackSpeed = 1.0f / 0.85f;
-
             cardInfo.categories = new CardCategory[]
             {
-                GearCategory.tagSpellOnlyAugment,
                 GearCategory.typeGlyph
             };
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-            // explosive mono stuff
+            // block.cdAdd += 0.25f;
 
-            characterStats.GetGearData().glyphInfluence += 1;
+            // if (block.cdAdd > 0.25f)
+            // {
+            //     
+            // }
+
+            // float echoTime = (float) Traverse.Create(block).Field("timeBetweenBlocks").GetValue() + 0.05f;
+            // echoTime = Mathf.Clamp(echoTime, 0.05f, 0.5f);
+            // Traverse.Create(block).Field("timeBetweenBlocks").SetValue((float)echoTime);
+
+            gun.attackSpeed += 0.1f;
+
+            characterStats.GetGearData().glyphProtection += 1;
+
+            GearUpPreRoundEffects mono = player.gameObject.GetOrAddComponent<GearUpPreRoundEffects>();
         }
         public override void OnRemoveCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-
+            // // undo stats where reset method doesn't clean up -- does not work well
+            // float echoTime = (float)Traverse.Create(block).Field("timeBetweenBlocks").GetValue() - 0.05f;
+            // echoTime = Mathf.Clamp(echoTime, 0.05f, 0.5f);
+            // Traverse.Create(block).Field("timeBetweenBlocks").SetValue((float)echoTime);
         }
         protected override string GetTitle()
         {
-            return "Influence Glyph";
+            return "Protection Glyph";
         }
         protected override string GetDescription()
         {
-            // return "Improve your Spells' range and effect area. Your Bullets cause a small blast on impact.";
-            return "Improve your Spells' range and effect area. Boost Glyphs and Spells draws";
+            return "Improve block and reduce spell effect against you. Slow down block echoes.";
         }
         protected override GameObject GetCardArt()
         {
-            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_GlyphInfluence");
+            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_GlyphProtection");
         }
         protected override CardInfo.Rarity GetRarity()
         {
@@ -58,25 +71,25 @@ namespace GearUpCards.Cards
         {
             return new CardInfoStat[]
             {
-                // new CardInfoStat()
-                // {
-                //     positive = true,
-                //     stat = "Blast DMG",
-                //     amount = "!WIP!",
-                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                // },
-                // new CardInfoStat()
-                // {
-                //     positive = false,
-                //     stat = "ATK SPD",
-                //     amount = "-15%",
-                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                // },
                 new CardInfoStat()
                 {
                     positive = true,
-                    stat = "Spell Range/AoE",
-                    amount = "Larger",
+                    stat = "Block I-Frame",
+                    amount = "+35%",
+                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
+                },
+                new CardInfoStat()
+                {
+                    positive = false,
+                    stat = "Block CD",
+                    amount = "-0.15s min",
+                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
+                },
+                new CardInfoStat()
+                {
+                    positive = false,
+                    stat = "ATK Time",
+                    amount = "+0.1s",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 }
             };

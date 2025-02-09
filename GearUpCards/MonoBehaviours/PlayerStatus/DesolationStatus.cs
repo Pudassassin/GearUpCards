@@ -4,22 +4,28 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using UnboundLib;
 using UnboundLib.GameModes;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace GearUpCards.MonoBehaviours
 {
-    internal class BlockStatus : ReversibleEffect
+    internal class DesolationStatus : ReversibleEffect
     {
         public static float DefaultBlockIFrame = 0.3f;
         public static Color DefaultShieldOnCD = new Color(0.1752f, 0.1912f, 0.2075f, 1f);
         public static Color DefaultShieldOffCD = new Color(0.8f, 0.8f, 0.8f, 1f);
+        public static Color DefaultBlockPart = new Color(1.0f, 1.0f, 1.0f, 1f);
 
-        // value is the multiplier to be used multiplicatively
-        private float blockIFrameFactor = 1.0f;
+        // I-Frame duration multiplier to be used multiplicatively - 1.0f is no changes
+        private float blockIFrameMul = 1.0f;
+
+        // block cooldown "speed" multiplier to be used additively - 1.0f is "normal" cooldown speed
+        private float blockCDSpeed = 1.0f;
+
         private float effectDuration = 4.0f;
-        private bool isFriendly = false;
+        // private bool isFriendly = false;
 
         internal bool wasDisabled = false;
 
@@ -33,37 +39,37 @@ namespace GearUpCards.MonoBehaviours
         private GameObject shieldCDObj = null;
         private Image shieldCDImage = null;
 
-        public void ApplyEffect(float factor, float duration, bool friendly)
+        public void ApplyEffect(float IF_Factor, float CD_Factor, float duration)
         {
-            if (friendly == this.isFriendly)
+            effectTimer = 0.0f;
+            if (IF_Factor < blockIFrameMul)
             {
-                effectTimer = 0.0f;
-                if (isFriendly && factor > blockIFrameFactor)
-                {
-                    blockIFrameFactor = factor;
-                }
-                else if (!isFriendly && factor < blockIFrameFactor)
-                {
-                    blockIFrameFactor = factor;
-                }
+                blockIFrameMul = IF_Factor;
+            }
 
-                if (duration > effectDuration)
-                {
-                    effectDuration = duration;
-                }
-            }
-            else
+            if (CD_Factor < blockCDSpeed)
             {
-                effectTimer = 0.0f;
-                blockIFrameFactor = factor;
-                effectDuration = duration;
-                isFriendly = friendly;
+                blockCDSpeed = CD_Factor;
             }
+
+            if (duration > effectDuration)
+            {
+                effectDuration = duration;
+            }
+
+            // Update Status UI
+            StatusUIMono statusUI = gameObject.GetOrAddComponent<StatusUIMono>();
+            statusUI.SetIcon(StatusUIMono.StatusID.ArmorBreak, true);
         }
 
         public float GetBlockIFrameMultiplier()
         {
-            return blockIFrameFactor;
+            return blockIFrameMul;
+        }
+
+        public float GetBlockCDMultiplier()
+        {
+            return blockCDSpeed;
         }
 
         public override void OnAwake()
@@ -78,6 +84,9 @@ namespace GearUpCards.MonoBehaviours
 
             GameModeManager.AddHook(GameModeHooks.HookPointEnd, OnPointEnd);
             GameModeManager.AddHook(GameModeHooks.HookPointStart, OnPointEnd);
+
+            var particleMain = block.particle.main;
+            particleMain.startColor = new Color(1.0f, 0.4f, 0.4f);
         }
 
         public override void OnUpdate()
@@ -89,22 +98,22 @@ namespace GearUpCards.MonoBehaviours
 
             effectTimer += TimeHandler.deltaTime;
 
-            if (isFriendly)
+            // effects
+            if (block.IsOnCD())
             {
-                
+                float speedFactor = blockCDSpeed - 1.0f;
+                block.counter += TimeHandler.deltaTime * speedFactor;
             }
-            else
-            {
-                // visual and VFX
-                if (blockIFrameFactor <= 0.0f)
-                {
-                    if (!block.IsOnCD())
-                    {
-                        shieldStoneSprite.color = Color.red;
-                    }
 
-                    shieldCDImage.color = Color.red;
+            // visual and VFX
+            if (blockIFrameMul <= 0.0f)
+            {
+                if (!block.IsOnCD())
+                {
+                    shieldStoneSprite.color = Color.red;
                 }
+
+                shieldCDImage.color = Color.red;
             }
 
             if (effectTimer > effectDuration)
@@ -124,6 +133,13 @@ namespace GearUpCards.MonoBehaviours
             }
 
             shieldCDImage.color = DefaultShieldOffCD;
+
+            var particleMain = block.particle.main;
+            particleMain.startColor = DefaultBlockPart;
+
+            // Update Status UI
+            StatusUIMono statusUI = gameObject.GetComponent<StatusUIMono>();
+            statusUI.SetIcon(StatusUIMono.StatusID.ArmorBreak, false);
 
             // unhook events
             GameModeManager.RemoveHook(GameModeHooks.HookPointEnd, OnPointEnd);

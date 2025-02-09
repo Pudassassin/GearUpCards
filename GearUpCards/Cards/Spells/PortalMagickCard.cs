@@ -22,7 +22,8 @@ namespace GearUpCards.Cards
             cardInfo.categories = new CardCategory[]
             {
                 GearCategory.typeUniqueMagick,
-                GearCategory.tagNoRemove
+                GearCategory.tagNoRemove,
+                GearCategory.tagNoEternity
             };
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)

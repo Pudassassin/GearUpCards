@@ -12,6 +12,7 @@ using GearUpCards.MonoBehaviours;
 using GearUpCards.Utils;
 using GearUpCards.Extensions;
 using static GearUpCards.Utils.CardUtils;
+using HarmonyLib;
 
 namespace GearUpCards.Cards
 {
@@ -28,25 +29,34 @@ namespace GearUpCards.Cards
         {
             if (block.cdMultiplier > 1.0f)
             {
-                block.cdMultiplier -= 0.25f;
+                block.cdMultiplier -= 0.30f;
             }
             else
             {
-                block.cdMultiplier *= 0.75f;
+                block.cdMultiplier *= 0.70f;
             }
 
             if (block.cdAdd > 1.0f)
             {
-                block.cdAdd -= 0.1f;
+                block.cdAdd -= 0.2f;
             }
 
-            player.data.maxHealth *= 0.75f;
+            // float echoTime = (float) Traverse.Create(block).Field("timeBetweenBlocks").GetValue() - 0.05f;
+            // echoTime = Mathf.Clamp(echoTime, 0.05f, 0.5f);
+            // Traverse.Create(block).Field("timeBetweenBlocks").SetValue((float)echoTime);
+
+            // player.data.maxHealth *= 0.75f;
 
             characterStats.GetGearData().glyphMagickFragment += 1;
+
+            GearUpPreRoundEffects mono = player.gameObject.GetOrAddComponent<GearUpPreRoundEffects>();
         }
         public override void OnRemoveCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-
+            // // undo stats where reset method doesn't clean up -- does not work well
+            // float echoTime = (float)Traverse.Create(block).Field("timeBetweenBlocks").GetValue() + 0.05f;
+            // echoTime = Mathf.Clamp(echoTime, 0.05f, 0.5f);
+            // Traverse.Create(block).Field("timeBetweenBlocks").SetValue((float)echoTime);
         }
         protected override string GetTitle()
         {
@@ -54,7 +64,7 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "This mysterious glyph hasten your spellcasting, but at what cost?";
+            return "Faster block echo and spell casting at the cost of safety!";
         }
         protected override GameObject GetCardArt()
         {
@@ -72,14 +82,7 @@ namespace GearUpCards.Cards
                 {
                     positive = true,
                     stat = "Block CD",
-                    amount = "-25% & -0.1s",
-                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                },
-                new CardInfoStat()
-                {
-                    positive = false,
-                    stat = "Health",
-                    amount = "-25%",
+                    amount = "-30% & -0.2s",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 },
                 new CardInfoStat()
@@ -87,6 +90,20 @@ namespace GearUpCards.Cards
                     positive = true,
                     stat = "Spell CD",
                     amount = "Faster",
+                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
+                },
+                // new CardInfoStat()
+                // {
+                //     positive = false,
+                //     stat = "Health",
+                //     amount = "-25%",
+                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
+                // },
+                new CardInfoStat()
+                {
+                    positive = false,
+                    stat = "Block I-Frame",
+                    amount = "-35%",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 }
             };

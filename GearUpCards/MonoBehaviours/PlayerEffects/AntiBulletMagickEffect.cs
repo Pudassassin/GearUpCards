@@ -29,7 +29,7 @@ namespace GearUpCards.MonoBehaviours
         private const float spellForceReloadTimeAddBase = 3.5f;
         private const float spellRangeBase = 12.5f;
         private const float spellDurationBase = 2.0f;
-        private const float spellForceReloadSelfMultiplierBase = 0.5f;
+        private const float spellForceReloadSelfMulBase = 0.5f;
 
         public float spellCastDelay = 0.1f;
         public float spellCastDelayTimer = 0.0f;
@@ -50,12 +50,14 @@ namespace GearUpCards.MonoBehaviours
         internal int glyphPotency = 0;
         // Zone duration
         internal int glyphTime = 0;
+        // Self-debuff resistance
+        internal int glyphProtection = 0;
 
         internal float spellCooldown = 12.0f;
         internal float spellRange = 10.0f;
         internal float spellForceReloadTimeAdd = 3.5f;
         internal float spellDuration = 1.5f;
-        internal float spellForceReloadSelfMultiplier = 0.5f;
+        internal float spellForceReloadSelfMul = 0.5f;
 
         internal bool spellReady = false;
         internal bool empowerCharged = false;
@@ -276,7 +278,7 @@ namespace GearUpCards.MonoBehaviours
                 // UnityEngine.Debug.Log($"[AntiBullet] Applying ForceReload to player[{target.playerID}]");
                 if (target.playerID == this.player.playerID)
                 {
-                    ApplyForceReload(targetGun, targetGunAmmo, spellForceReloadTimeAdd * spellForceReloadSelfMultiplier);
+                    ApplyForceReload(targetGun, targetGunAmmo, spellForceReloadTimeAdd * spellForceReloadSelfMul);
                 }
                 else
                 {
@@ -294,12 +296,13 @@ namespace GearUpCards.MonoBehaviours
             glyphInfluence = this.stats.GetGearData().glyphInfluence;
             glyphPotency = this.stats.GetGearData().glyphPotency;
             glyphTime = this.stats.GetGearData().glyphTime;
+            glyphProtection = this.stats.GetGearData().glyphProtection;
 
             spellCooldown = spellCooldownBase - (magickFragment * 1.5f);
             spellCooldown = Mathf.Clamp(spellCooldown, 6.0f, 30.0f);
 
-            spellForceReloadSelfMultiplier = spellForceReloadSelfMultiplierBase - (magickFragment * 0.05f);
-            spellForceReloadSelfMultiplier = Mathf.Clamp(spellForceReloadSelfMultiplier, 0.0f, 1.0f);
+            spellForceReloadSelfMul = spellForceReloadSelfMulBase - (glyphProtection * 0.15f);
+            spellForceReloadSelfMul = Mathf.Clamp(spellForceReloadSelfMul, 0.05f, 1.0f);
 
             spellRange = spellRangeBase + (1.0f * glyphInfluence);
 

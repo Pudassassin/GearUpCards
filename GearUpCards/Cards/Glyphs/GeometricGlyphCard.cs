@@ -63,7 +63,7 @@ namespace GearUpCards.Cards
         protected override string GetDescription()
         {
             // return "Add some bounces to your Bullets and Spell Orbs. Not all Spells can be bouncy, through...";
-            return "<i>\"Simple Geometry!\"</i>";
+            return "<i><b>\"Simple Trigonometry!\"</b></i>";
         }
         protected override GameObject GetCardArt()
         {

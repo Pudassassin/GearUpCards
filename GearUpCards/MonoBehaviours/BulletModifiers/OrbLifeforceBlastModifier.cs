@@ -34,6 +34,8 @@ namespace GearUpCards.MonoBehaviours
         internal float procTimer = 0.0f;
         internal bool effectEnable = false;
 
+        internal bool fullArcane = false;
+
         public void Setup()
         {
             projectileHit = transform.root.GetComponentInParent<ProjectileHit>();
@@ -41,7 +43,7 @@ namespace GearUpCards.MonoBehaviours
             casterStats = casterPlayer.data.stats;
             // moveTransform = transform.root.GetComponentInChildren<MoveTransform>();
 
-            // Orb Stats /wip
+            // Orb Stats
             healFlat        = 30.0f + (15.0f * casterStats.GetGearData().glyphPotency);
             healPercent     = 0.05f + (0.025f * casterStats.GetGearData().glyphPotency);
             drainFlat       = 50.0f + (25.0f * casterStats.GetGearData().glyphPotency);
@@ -51,8 +53,16 @@ namespace GearUpCards.MonoBehaviours
             effectDuration  = 5.0f + (1.0f * casterStats.GetGearData().glyphTime);
 
             // value is the multiplier to be used multiplicatively
-            healAmp = 5.0f - (5.0f * Mathf.Pow(0.6f, casterStats.GetGearData().glyphPotency + 1));
-            healHinder = Mathf.Pow(0.5f, casterStats.GetGearData().glyphPotency + 1);
+            healAmp = 1.5f + (0.15f * (float)casterStats.GetGearData().glyphPotency);
+            healAmp = Mathf.Clamp(healAmp, 1.0f, 2.5f);
+
+            healHinder = 0.4f - (0.1f * (float)casterStats.GetGearData().glyphPotency);
+            healHinder = Mathf.Clamp(healHinder, 0.0f, 1.0f);
+
+            if (casterPlayer.gameObject.GetComponent<CharacterStatModifiers>().GetGearData().arcaneConversionStack > 0)
+            {
+                fullArcane = true;
+            }
 
             // visuals
             orbObject = Instantiate(vfxOrb, transform.root);
@@ -86,40 +96,66 @@ namespace GearUpCards.MonoBehaviours
         public override HasToReturn DoHitEffect(HitInfo hit)
         {
             float distance;
-            foreach (Player item in PlayerManager.instance.players)
+            foreach (Player target in PlayerManager.instance.players)
             {
-                if (!item.gameObject.activeInHierarchy || item.data.healthHandler.isRespawning)
+                if (!target.gameObject.activeInHierarchy || target.data.healthHandler.isRespawning)
                 {
                     // either dead or reviving
                     continue;
                 }
 
-                distance = (item.gameObject.transform.position - transform.root.position).magnitude;
+                distance = (target.gameObject.transform.position - transform.root.position).magnitude;
                 if (distance > effectRadius)
                 {
                     // ...out of range
                     continue;
                 }
 
-                if (item.teamID == casterPlayer.teamID)
+                if (target.teamID == casterPlayer.teamID)
                 {
                     // Heal friends
-                    float healAmount = (healFlat + (item.data.maxHealth * healPercent));
-                    item.data.healthHandler.Heal(healAmount);
+                    float healAmount = (healFlat + (target.data.maxHealth * healPercent));
+                    target.data.healthHandler.Heal(healAmount);
 
-                    LifeforceBlastStatus status = item.gameObject.GetOrAddComponent<LifeforceBlastStatus>();
+                    LifeforceBlastStatus status = target.gameObject.GetOrAddComponent<LifeforceBlastStatus>();
                     status.ApplyEffect(healAmp, effectDuration, true);
                 }
                 else
                 {
-                    // drain enemies' lives
-                    float drainAmount = (drainFlat + (item.data.maxHealth * drainPercent));
-                    // item.data.health -= drainAmount * 0.5f;
-                    item.data.healthHandler.Heal(-drainAmount * 0.5f);
-                    item.data.healthHandler.RPCA_SendTakeDamage(new Vector2(drainAmount * 0.5f, 0.0f), this.transform.position, playerID: casterPlayer.playerID);
+                    CharacterStatModifiers stats = target.gameObject.GetComponent<CharacterStatModifiers>();
+                    int protectionLvl = stats.GetGearData().glyphProtection;
 
-                    LifeforceBlastStatus status = item.gameObject.GetOrAddComponent<LifeforceBlastStatus>();
-                    status.ApplyEffect(healHinder, effectDuration, false);
+                    // drain enemies' lives
+                    float drainAmount = (drainFlat + (target.data.maxHealth * drainPercent));
+
+                    if (protectionLvl > 0)
+                    {
+                        drainAmount *= Mathf.Pow(0.85f, protectionLvl);
+                    }
+
+                    if (fullArcane)
+                    {
+                        target.data.healthHandler.Heal(-drainAmount);
+                        target.data.healthHandler.RPCA_SendTakeDamage(new Vector2(0.05f, 0.0f), target.transform.position);
+                    }
+                    else
+                    {
+                        target.data.healthHandler.Heal(-drainAmount * 0.5f);
+                        target.data.healthHandler.RPCA_SendTakeDamage(new Vector2(drainAmount * 0.5f, 0.0f), target.transform.position, playerID: casterPlayer.playerID);
+                    }
+
+                    LifeforceBlastStatus status = target.gameObject.GetOrAddComponent<LifeforceBlastStatus>();
+                    if (protectionLvl > 0)
+                    {
+                        float tValue = Mathf.Pow(0.90f, protectionLvl);
+                        float lerp = Mathf.Lerp(1.0f, healHinder, tValue);
+
+                        status.ApplyEffect(lerp, effectDuration, false);
+                    }
+                    else
+                    {
+                        status.ApplyEffect(healHinder, effectDuration, false);
+                    }
                 }
             }
 

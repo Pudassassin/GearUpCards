@@ -24,7 +24,8 @@ namespace GearUpCards.Cards
             cardInfo.allowMultiple = false;
             cardInfo.categories = new CardCategory[]
             {
-                GearCategory.typeUniqueGunSpread
+                GearCategory.typeUniqueGunSpread,
+                GearCategory.tagNoEternity
             };
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
@@ -71,7 +72,7 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "Add and evenly spread bullets in an arc formation.";
+            return "Spread bullets evenly in arc; can no longer focus down to pinpoint.";
         }
         protected override GameObject GetCardArt()
         {
