@@ -16,11 +16,13 @@ namespace GearUpCards.Cards
 {
     class MysticMissileCard : CustomCard
     {
-        public static GameObject ATPEffectPrefab = GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion");
-        public static GameObject ATPEffectEcoMode = GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion_Eco");
-        public static GameObject ATPEffectLiteMode = GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion_Lite");
+        // Unity-mod doesn't like loading asset as static...?
 
-        public static GameObject VFXPrefab = GearUpCards.ATPBundle.LoadAsset<GameObject>("VFX_Part_MagicSpark");
+        // public static GameObject ATPEffectPrefab = GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion");
+        // public static GameObject ATPEffectEcoMode = GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion_Eco");
+        // public static GameObject ATPEffectLiteMode = GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion_Lite");
+        // 
+        // public static GameObject VFXPrefab = GearUpCards.ATPBundle.LoadAsset<GameObject>("VFX_Part_MagicSpark");
 
         // public static GameObject objectToSpawn = null;
         public static Dictionary<int, ObjectsToSpawn> objectSpawnDict = new Dictionary<int, ObjectsToSpawn>();
@@ -77,7 +79,7 @@ namespace GearUpCards.Cards
                     List<Renderer> renderers;
 
                     // persisting effect on bullet
-                    objectAddSpawn = Instantiate(VFXPrefab);
+                    objectAddSpawn = Instantiate(GearUpCards.ATPBundle.LoadAsset<GameObject>("VFX_Part_MagicSpark"));
                     objectAddSpawn.name = "MysticMissileModifier " + player.playerID;
                     objectAddSpawn.transform.position = new Vector3(10000f, 10000f, 0.0f);
 
@@ -109,7 +111,7 @@ namespace GearUpCards.Cards
                     // impact effect on bullet
                     if (GearUpCards.ReducedVFX && !GearUpCards.EcoModeVFX)
                     {
-                        effectSpawn = Instantiate(ATPEffectLiteMode);
+                        effectSpawn = Instantiate(GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion_Lite"));
 
                         RemoveAfterSpawn removeSpawn = effectSpawn.AddComponent<RemoveAfterSpawn>();
                         effectSpawn.AddComponent<SetColorToParticles>();
@@ -117,14 +119,14 @@ namespace GearUpCards.Cards
                     }
                     else if (GearUpCards.EcoModeVFX)
                     {
-                        effectSpawn = Instantiate(ATPEffectEcoMode);
+                        effectSpawn = Instantiate(GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion_Eco"));
 
                         RemoveAfterSpawn removeSpawn = effectSpawn.AddComponent<RemoveAfterSpawn>();
                         removeSpawn.timeToRemove = 1.25f;
                     }
                     else
                     {
-                        effectSpawn = Instantiate(ATPEffectPrefab);
+                        effectSpawn = Instantiate(GearUpCards.ATPBundle.LoadAsset<GameObject>("ATP_Effect_MagicExplosion"));
 
                         RemoveAfterSpawn removeSpawn = effectSpawn.AddComponent<RemoveAfterSpawn>();
                         effectSpawn.AddComponent<SetColorToParticles>();

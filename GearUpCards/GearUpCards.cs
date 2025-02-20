@@ -24,6 +24,7 @@ using UnboundLib.Utils;
 using UnboundLib.Extensions;
 using RarityLib.Utils;
 using static GearUpCards.MonoBehaviours.CardDrawTracker;
+using GearUpCards.MonoBehaviours.Visuals;
 
 namespace GearUpCards
 {
@@ -47,7 +48,7 @@ namespace GearUpCards
     {
         public const string ModId = "com.pudassassin.rounds.GearUpCards";
         public const string ModName = "GearUpCards";
-        public const string Version = "0.4.3.36"; //build #296  / Release 0-5-0
+        public const string Version = "0.4.3.55"; //build #315  / Release 0-5-0
 
         public const string ModInitials = "GearUP";
 
@@ -59,12 +60,14 @@ namespace GearUpCards
         // public Dictionary<Rarity, CardCategory> rarityCategories = new Dictionary<Rarity, CardCategory>();
         // public Dictionary<string, CardCategory> packCategories = new Dictionary<string, CardCategory>();
 
-        // public static GearUpCards Instance { get; private set; }
+        public static GameObject bulletObj;
         public static bool isCardPickingPhase = false;
         public static bool isCardExtraDrawPhase = false;
         static int lastPickerID = -1;
 
         // ========================================
+        // base for mod configs
+        
         public const string CompatibilityModName = "GearUpCards";
 
         internal static string ConfigKey(string name)
@@ -128,7 +131,7 @@ namespace GearUpCards
             var harmony = new Harmony(ModId);
             harmony.PatchAll();
 
-            gameObject.AddComponent<BountyDamageTracker>();
+            // gameObject.AddComponent<BountyDamageTracker>();
         }
         void Start()
         {
@@ -141,6 +144,7 @@ namespace GearUpCards
             CustomCard.BuildCard<SizeNormalizerCard>();
             CustomCard.BuildCard<BulletsDotRarCard>();
             CustomCard.BuildCard<DesolationCard>();
+            CustomCard.BuildCard<LaserSightCard>();
 
             CustomCard.BuildCard<MedicCheckupCard>();
             CustomCard.BuildCard<HyperRegenerationCard>();
@@ -220,6 +224,11 @@ namespace GearUpCards
             // make cards mutually exclusive
             this.ExecuteAfterFrames(10, () =>
             {
+                // temp exclusive (Known issues)
+                MakeExclusive("Arcane Conversion", "Flak Cannon");
+
+                // ==============
+
                 if (GetCardInfo("Size Difference") != null)
                 {
                     CardInfo otherCard = GetCardInfo("Size Difference");
@@ -337,6 +346,31 @@ namespace GearUpCards
                     packCategories.Add(item, CustomCardCategories.instance.CardCategory("__Pack-" + item));
                 }
             });
+
+            // find and add mono to base object (careful!)
+            this.ExecuteAfterFrames(95, () =>
+            {
+                GameObject[] gameObjects = Resources.FindObjectsOfTypeAll(typeof(GameObject)) as GameObject[];
+                foreach (var item in gameObjects)
+                {
+                    if (item.name == "Bullet_Base" && item.CompareTag("Bullet"))
+                    {
+                        bulletObj = item;
+                        break;
+                    }
+                }
+
+                MoveTransform moveTransform = bulletObj.GetComponent<MoveTransform>();
+                ProjectileHit projectileHit = bulletObj.GetComponent<ProjectileHit>();
+
+                bool check = (moveTransform != null) && (projectileHit != null);
+
+                if (check)
+                {
+                    BulletVFXScale scaler = bulletObj.AddComponent<BulletVFXScale>();
+                    Miscs.Log("[GearUp] added experimental bullet VFX rescaler");
+                }
+            });
         }
 
         void Update()
@@ -361,6 +395,7 @@ namespace GearUpCards
         // initial card blacklist/whitelist at game start
         IEnumerator GameStart(IGameModeHandler gm)
         {
+            // preping player's blacklist category
             foreach (var player in PlayerManager.instance.players)
             {
                 // DONT DO THIS!!! ModdingUtils.Extensions.CharacterStatModifiersExtension.GetAdditionalData(player.data.stats).blacklistedCategories.Clear();
@@ -438,6 +473,7 @@ namespace GearUpCards
             }
             MysticMissileCard.objectSpawnDict.Clear();
 
+            // preping essential mono to players (safe and sure way)
             foreach (var player in PlayerManager.instance.players)
             {
                 player.gameObject.GetOrAddComponent<CardDrawTracker>();
@@ -450,7 +486,7 @@ namespace GearUpCards
 
         IEnumerator OnPickStart(IGameModeHandler gm)
         {
-            Miscs.Log("\n[GearUpCard] OnPickStart()");
+            Miscs.Log("\n[GearUp] OnPickStart()");
             // CardUtils.SaveCardRarity();
             isCardPickingPhase = true;
 
@@ -459,14 +495,14 @@ namespace GearUpCards
 
         IEnumerator OnPlayerPickEnd(IGameModeHandler gm)
         {
-            Miscs.Log("\n[GearUpCard] OnPickEnd()");
+            Miscs.Log("\n[GearUp] OnPickEnd()");
             CardUtils.RarityDelta.UndoAll();
 
             yield return new WaitForSecondsRealtime(0.1f);
             if (!isCardExtraDrawPhase && CardDrawTracker.extraDrawPlayerQueue.Count > 0)
             {
                 isCardExtraDrawPhase = true;
-                Miscs.Log("[GearUpCard] Extra draw locked in");
+                Miscs.Log("[GearUp] Extra draw locked in");
 
                 for (int i = 0; i < CardDrawTracker.extraDrawPlayerQueue.Count; i++)
                 {
@@ -494,7 +530,7 @@ namespace GearUpCards
                 }
 
                 isCardExtraDrawPhase = false;
-                Miscs.Log("[GearUpCard] Extra draw unlocked");
+                Miscs.Log("[GearUp] Extra draw unlocked");
             }
 
             yield break;
@@ -502,13 +538,13 @@ namespace GearUpCards
 
         IEnumerator LateExtraDrawEvent(IGameModeHandler gm)
         {
-            Miscs.Log("\n[GearUpCard] LateExtraDrawEvent()");
+            Miscs.Log("\n[GearUp] LateExtraDrawEvent()");
 
             yield return new WaitForSecondsRealtime(0.1f);
             if (!isCardExtraDrawPhase && CardDrawTracker.extraDrawPlayerQueue.Count > 0)
             {
                 isCardExtraDrawPhase = true;
-                Miscs.Log("[GearUpCard] Late Extra draw locked in");
+                Miscs.Log("[GearUp] Late Extra draw locked in");
 
                 for (int i = 0; i < CardDrawTracker.extraDrawPlayerQueue.Count; i++)
                 {
@@ -525,7 +561,7 @@ namespace GearUpCards
 
                 CardDrawTracker.extraDrawPlayerQueue.Clear();
                 isCardExtraDrawPhase = false;
-                Miscs.Log("[GearUpCard] Late Extra draw unlocked");
+                Miscs.Log("[GearUp] Late Extra draw unlocked");
 
             }
 

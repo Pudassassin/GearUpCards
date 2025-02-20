@@ -14,33 +14,64 @@ namespace GearUpCards.Utils
 {
     internal class Miscs
     {
-        public static bool debugFlag = true;
+        public static bool debugLog = true;
+        public static bool infoLog = true;
+        public static bool suppressError = false;
 
-		// Debug logs
-		public static void LogInfo(object message)
+        public static float compensateBase = 0.0f;			// was 2.0
+        public static float compensatePower = 1.0f;			// was 1.0
+        public static float compensateThreshold = 50.0f;	// was 25.0
+
+        // Debug logs
+        public static void LogInfo(object message)
         {
-			UnityEngine.Debug.Log(message);
+			if (infoLog)
+			{
+				UnityEngine.Debug.Log(message);
+			}
         }
         public static void Log(object message)
         {
-            if (debugFlag)
+            if (debugLog)
             {
                 UnityEngine.Debug.Log(message);
             }
         }
         public static void LogWarn(object message)
         {
-            if (debugFlag)
+            if (!suppressError)
             {
                 UnityEngine.Debug.LogWarning(message);
             }
         }
         public static void LogError(object message)
         {
-            if (debugFlag)
+            if (!suppressError)
             {
                 UnityEngine.Debug.LogError(message);
             }
+        }
+
+		// take away a life from a player (check condition first!)
+		public static void KillOneLife(Player player)
+		{
+            if (player.data.stats.remainingRespawns > 0)
+            {
+				player.gameObject.GetComponent<HealthHandler>().InvokeMethod("RPCA_Die_Phoenix", Vector2.up);
+                player.data.view.RPC("RPCA_Die_Phoenix", RpcTarget.Others, Vector2.up);
+            }
+            else
+            {
+                player.gameObject.GetComponent<HealthHandler>().InvokeMethod("RPCA_Die", Vector2.up);
+                player.data.view.RPC("RPCA_Die", RpcTarget.Others, Vector2.up);
+            }
+        }
+
+		// ultimate kill command
+		public static void GodKill(Player player)
+		{
+            player.gameObject.GetComponent<HealthHandler>().InvokeMethod("RPCA_Die", Vector2.up);
+            player.data.view.RPC("RPCA_Die", RpcTarget.Others, Vector2.up);
         }
 
 		// get the 'time flow' speed
@@ -50,6 +81,7 @@ namespace GearUpCards.Utils
 		}
 
 		// Vector Utils
+		// Rotate CCW!
 		public static Vector3 RotateVector(Vector3 vector, float degree)
         {
 			float sin = Mathf.Sin(degree * Mathf.Deg2Rad);
@@ -62,6 +94,65 @@ namespace GearUpCards.Utils
 			vector.y = (sin * prevX) + (cos * prevY);
 
 			return vector;
+        }
+
+		public static Vector3 ScaleNormalize(Vector3 scale)
+		{
+			float max = Mathf.Max(scale.x, scale.y, scale.z);
+
+            return new Vector3(scale.x / max, scale.y / max, scale.z / max);
+		}
+
+		public static Vector2 BulletDropCorrection(Vector2 toward, Vector2 velocity, float gravitySum)
+		{
+			if (StatsMath.ApproxEqual(velocity.x, 0.0f) || StatsMath.ApproxEqual(gravitySum, 0.0f))
+			{
+				return velocity;
+			}
+
+			Vector2 newVel = Vector2.zero;
+			float speed = velocity.magnitude;
+
+			//compensating inaccuracy
+			float effSpeed = speed + Mathf.Pow((compensateThreshold - speed) * compensateBase, compensatePower);
+
+            Vector2 gravProject = Vector3.Project(gravitySum * Vector2.down, toward);
+            Log($"gravSplit = {gravitySum * Vector2.down} / {toward} = {gravProject}");
+
+            float speedNew = Mathf.Sqrt(effSpeed * effSpeed + 2.0f * gravProject.magnitude * toward.magnitude);
+			float bulletTime = (speedNew - effSpeed) / gravProject.magnitude;
+            Log($"bulletTime = ({speedNew} - {effSpeed}) / {gravProject.x} = {bulletTime}");
+
+            if (bulletTime < 0.02)
+			{
+                return velocity;
+            }
+
+			newVel.x = toward.x / bulletTime;
+            Log($"newVel.x = {toward.x} / {bulletTime} = {newVel.x}");
+
+            if (float.IsNaN(newVel.x))
+			{
+				LogWarn("newVel.x is NaN!");
+                return velocity;
+            }
+
+			newVel.y = Mathf.Sqrt((speed * speed) - (newVel.x * newVel.x)) * Mathf.Sign(gravitySum);
+            Log($"newVel.y^2 = ({speed})^2 - ({newVel.x})^2 = {newVel.y}");
+
+            if (float.IsNaN(newVel.y))
+            {
+                LogWarn("newVel.y is NaN!");
+                newVel.y = Mathf.Sqrt((speedNew * speedNew) - (newVel.x * newVel.x)) * Mathf.Sign(gravitySum);
+                Log($"newVel.y^2 = ({speedNew})^2 - ({newVel.x})^2 = {newVel.y}");
+            }
+            if (float.IsNaN(newVel.y))
+            {
+                LogWarn("newVel.y is NaN!!!");
+                return toward.normalized * speed;
+            }
+
+            return newVel.normalized * speed;
         }
 
 		// Component Wrapper
@@ -117,7 +208,11 @@ namespace GearUpCards.Utils
 						gradient.colorKeys[i] = new GradientColorKey(partGrad.colorKeys[i].color, partGrad.colorKeys[i].time);
 					}
 
-					backupGradients.TryAdd(part, gradient);
+                    //backupGradients.TryAdd(part, gradient);
+                    if (!backupGradients.ContainsKey(part))
+                    {
+                        backupGradients.Add(part, gradient);
+                    }
                 }
             }
 

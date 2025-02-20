@@ -286,7 +286,7 @@ namespace GearUpCards.MonoBehaviours
 
         public IEnumerator ResolveExtraDraws(bool resolveLateDraw = false)
         {
-            Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws()");
+            Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws()");
             if (extraCardDraws.Count <= 0 || isResolving)
             {
                 yield break;
@@ -318,10 +318,10 @@ namespace GearUpCards.MonoBehaviours
                 // resolve booster-pack unpacking event
                 if (extraCardDraws[drawQueue].sourceCard != null)
                 {
-                    Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : " + extraCardDraws[drawQueue].sourceCard.cardName);
+                    Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : " + extraCardDraws[drawQueue].sourceCard.cardName);
                 }
 
-                Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : player's blacklist before VVV");
+                Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : player's blacklist before VVV");
                 string logBlacklist = "";
                 foreach (var item in playerBlacklist)
                 {
@@ -330,7 +330,7 @@ namespace GearUpCards.MonoBehaviours
                 Miscs.Log(logBlacklist);
 
                 // A1) add to blacklist temporarily
-                Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : edit blacklist");
+                Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : edit blacklist");
                 foreach (var item in extraCardDraws[drawQueue].blacklistCategories)
                 {
                     // check if already blacklisted
@@ -342,7 +342,12 @@ namespace GearUpCards.MonoBehaviours
                     else
                     {
                         // it's not there, add it and save the changes
-                        blacklistDelta.TryAdd(item, false);
+                        //blacklistDelta.TryAdd(item, false);
+                        if (!blacklistDelta.ContainsKey(item))
+                        {
+                            blacklistDelta.Add(item, false);
+                        }
+
                         playerBlacklist.Add(item);
                     }
                 }
@@ -354,7 +359,12 @@ namespace GearUpCards.MonoBehaviours
                     if (playerBlacklist.Contains(item))
                     {
                         // it's there, remove it and save the changes
-                        blacklistDelta.TryAdd(item, true);
+                        //blacklistDelta.TryAdd(item, true);
+                        if (!blacklistDelta.ContainsKey(item))
+                        {
+                            blacklistDelta.Add(item, true);
+                        }
+
                         playerBlacklist.Remove(item);
                         continue;
                     }
@@ -372,7 +382,7 @@ namespace GearUpCards.MonoBehaviours
 
                     // A //
 
-                    Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : show card");
+                    Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : show card");
                     CardChoiceVisuals.instance.Show(Enumerable.Range(0, PlayerManager.instance.players.Count).Where(i => PlayerManager.instance.players[i].playerID == player.playerID).First(), true);
                     yield return CardChoice.instance.DoPick(1, player.playerID, PickerType.Player);
                     yield return new WaitForSecondsRealtime(0.1f);
@@ -385,7 +395,7 @@ namespace GearUpCards.MonoBehaviours
                 }
 
                 // B) restore original blacklist that had changed via this method; unlisted one will not be changed
-                Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : undo blacklist");
+                Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : undo blacklist");
                 foreach (var item in blacklistDelta.Keys)
                 {
                     // true  => it was blacklisted and got removed  | add back in when restoring
@@ -404,10 +414,10 @@ namespace GearUpCards.MonoBehaviours
                 }
 
                 // C) resolve booster-pack post-unpacking event/action
-                Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : dequeue action");
+                Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : dequeue action");
                 extraCardDraws[drawQueue].dequeueAction(player);
 
-                Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : player's blacklist after VVV");
+                Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : player's blacklist after VVV");
                 logBlacklist = "";
                 foreach (var item in playerBlacklist)
                 {
@@ -416,7 +426,7 @@ namespace GearUpCards.MonoBehaviours
                 Miscs.Log(logBlacklist);
             }
 
-            Miscs.Log("[GearUpCard] CardDrawTracker.ResolveExtraDraws() : finishing");
+            Miscs.Log("[GearUp] CardDrawTracker.ResolveExtraDraws() : finishing");
             extraCardDraws.Clear();
 
             // requeue skipped draws

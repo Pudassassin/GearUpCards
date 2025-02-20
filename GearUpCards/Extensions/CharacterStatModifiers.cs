@@ -56,6 +56,7 @@ namespace GearUpCards.Extensions
         public int tacticalScannerStack;
         public int shieldBatteryStack;
         public int desolationStack;
+        public int laserSightStack;
 
         public int medicalPartStack;
         public int medicCheckupStack;
@@ -109,6 +110,7 @@ namespace GearUpCards.Extensions
             tacticalScannerStack = 0;
             shieldBatteryStack = 0;
             desolationStack = 0;
+            laserSightStack = 0;
 
             medicalPartStack = 0;
             medicCheckupStack = 0;
@@ -180,6 +182,7 @@ namespace GearUpCards.Extensions
             __instance.GetGearData().tacticalScannerStack = 0;
             __instance.GetGearData().shieldBatteryStack = 0;
             __instance.GetGearData().desolationStack = 0;
+            __instance.GetGearData().laserSightStack = 0;
 
             __instance.GetGearData().medicalPartStack = 0;
             __instance.GetGearData().medicCheckupStack = 0;

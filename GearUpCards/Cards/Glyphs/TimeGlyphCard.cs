@@ -32,6 +32,11 @@ namespace GearUpCards.Cards
             {
                 gun.destroyBulletAfter *= 1.50f;
             }
+            else
+            {
+                gun.destroyBulletAfter = 15.0f * 1.50f;
+            }
+
             if (gun.drag > 0.0f)
             {
                 gun.drag *= 0.75f;

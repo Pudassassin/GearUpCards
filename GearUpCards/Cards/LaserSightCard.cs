@@ -15,10 +15,8 @@ using static GearUpCards.Utils.CardUtils;
 
 namespace GearUpCards.Cards
 {
-    class ArcaneConversionCard : CustomCard
+    class LaserSightCard : CustomCard
     {
-        public static GameObject objectToSpawn = null;
-
         public override void SetupCard(CardInfo cardInfo, Gun gun, ApplyCardStats cardStats, CharacterStatModifiers statModifiers, Block block)
         {
             cardInfo.categories = new CardCategory[]
@@ -28,31 +26,14 @@ namespace GearUpCards.Cards
         }
         public override void OnAddCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
         {
-            // add ONLY one stack to the bullet modifier pool
-            if (characterStats.GetGearData().arcaneConversionStack == 0)
+            characterStats.GetGearData().laserSightStack += 1;
+            player.gameObject.GetOrAddComponent<LaserSightEffect>();
+
+            gun.attackSpeed += 0.1f;
+            gun.spread -= 20.0f / 360.0f;
+            if (gun.spread < 0.0f)
             {
-                if (objectToSpawn == null)
-                {
-                    objectToSpawn = new GameObject("ArcaneConversionModifier", new Type[]
-                    {
-                        typeof(ArcaneConversionModifier)
-                    });
-                    DontDestroyOnLoad(objectToSpawn);
-                }
-
-                List<ObjectsToSpawn> list = gun.objectsToSpawn.ToList<ObjectsToSpawn>();
-                list.Add(new ObjectsToSpawn
-                {
-                    AddToProjectile = objectToSpawn
-                });
-
-                gun.objectsToSpawn = list.ToArray();
-            }
-
-            characterStats.GetGearData().arcaneConversionStack += 1;
-            if (characterStats.GetGearData().arcaneConversionStack >= 2)
-            {
-                gun.unblockable = true;
+                gun.spread = 0.0f;
             }
         }
         public override void OnRemoveCard(Player player, Gun gun, GunAmmo gunAmmo, CharacterData data, HealthHandler health, Gravity gravity, Block block, CharacterStatModifiers characterStats)
@@ -61,20 +42,19 @@ namespace GearUpCards.Cards
         }
         protected override string GetTitle()
         {
-            return "Arcane Conversion";
+            return "Laser Sight";
         }
         protected override string GetDescription()
         {
-            return "Part of your damage bypass\ndefense and reaction effects\n2nd copy: 100% & Unblockable!\nExtra copies gains:";
-            // return "Part of your damage bypass defenses and reactions.\n2nd copy: 100% Magic! - Extra copies gains:";
+            return "Visualize your approx. bullet's trajectory and spread!";
         }
         protected override GameObject GetCardArt()
         {
-            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_ArcaneConversion");
+            return GearUpCards.CardArtBundle.LoadAsset<GameObject>("C_LaserSight");
         }
         protected override CardInfo.Rarity GetRarity()
         {
-            return CardInfo.Rarity.Common;
+            return CardInfo.Rarity.Uncommon;
         }
         protected override CardInfoStat[] GetStats()
         {
@@ -83,22 +63,22 @@ namespace GearUpCards.Cards
                 new CardInfoStat()
                 {
                     positive = true,
-                    stat = "\'DMG\' dealt",
-                    amount = "+35% All",
+                    stat = "Spread",
+                    amount = "-20 deg",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 },
                 new CardInfoStat()
                 {
                     positive = false,
-                    stat = "DMG taken",
-                    amount = "+10% All",
+                    stat = "ATK Time",
+                    amount = "+0.1s",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 }
             };
         }
         protected override CardThemeColor.CardThemeColorType GetTheme()
         {
-            return CardThemeColor.CardThemeColorType.MagicPink;
+            return CardThemeColor.CardThemeColorType.FirepowerYellow;
         }
         public override string GetModName()
         {
@@ -106,7 +86,7 @@ namespace GearUpCards.Cards
         }
         public override void Callback()
         {
-            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Damage\nPassive";
+            this.cardInfo.gameObject.AddComponent<ExtraName>().text = "Gun\nPassive";
         }
     }
 }

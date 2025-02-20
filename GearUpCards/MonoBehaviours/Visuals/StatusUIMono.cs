@@ -181,6 +181,7 @@ namespace GearUpCards.MonoBehaviours
         {
             //effectWarmup = true;
             effectEnabled = true;
+            HideAllIcons();
 
             // FetchAbilities();
 

@@ -124,6 +124,15 @@ namespace GearUpCards.MonoBehaviours
             }
 
             empowerImpactCount--;
+            if (empowerImpactCount <= 0)
+            {
+                CustomEmpowerVFX vfx = transform.root.GetComponentInChildren<CustomEmpowerVFX>();
+                if (vfx != null)
+                {
+                    vfx.gameObject.SetActive(false);
+                }
+            }
+
             return HasToReturn.canContinue;
         }
 
@@ -133,17 +142,20 @@ namespace GearUpCards.MonoBehaviours
         }
     }
 
-    public class CustomEmpowerVFX : MonoBehaviour
+    public class CustomEmpowerVFX : RayHitEffect
     {
         private static GameObject empowerShotVFX = GearUpCards.VFXBundle.LoadAsset<GameObject>("VFX_EmpowerShot");
-        public static float vfxScale = 0.25f;
-        public static float vfxScaleLog = 10.0f;
+        public static float LogBase = 2.2f;
+        public static float MinSize = 0.5f;
+        public static float MaxSize = 25.0f;
+        public static float VFXScale = 0.2f;
 
         ProjectileHit projectileHit;
+        ArcaneConversionModifier arcaneMod;
         Player shooterPlayer;
 
         private GameObject vfxObject;
-        private float bulletSize = 0.25f;
+        private float bulletSize = 1.0f;
         private float damage;
 
         internal bool effectEnable = false;
@@ -151,19 +163,27 @@ namespace GearUpCards.MonoBehaviours
         public void Setup()
         {
             projectileHit = this.gameObject.GetComponentInParent<ProjectileHit>();
+            arcaneMod = this.gameObject.GetComponentInParent <ArcaneConversionModifier>();
+
             shooterPlayer = projectileHit.ownPlayer;
 
             vfxObject = UnityEngine.Object.Instantiate(empowerShotVFX, transform.root);
             vfxObject.transform.localEulerAngles = new Vector3(270.0f, 180.0f, 0.0f);
-            vfxObject.transform.localScale = Vector3.one * bulletSize;
+            vfxObject.transform.localScale = Vector3.one;
         }
 
         public void Update()
         {
             if (effectEnable)
             {
-                damage = projectileHit.dealDamageMultiplierr * projectileHit.damage;
-                bulletSize = Mathf.Max(Mathf.Log(damage, vfxScaleLog) * vfxScale, 0.5f);
+                damage = projectileHit.damage;
+                if (arcaneMod != null)
+                {
+                    damage += arcaneMod.arcaneDamage;
+                }
+                bulletSize = VFXScale * (1.0f + Mathf.Log(damage / 55.0f, LogBase));
+                bulletSize = Mathf.Clamp(bulletSize, MinSize, MaxSize);
+
                 vfxObject.transform.localScale = Vector3.one * bulletSize;
             }
             else
@@ -175,6 +195,17 @@ namespace GearUpCards.MonoBehaviours
                     effectEnable = true;
                 }
             }
+        }
+
+        public override HasToReturn DoHitEffect(HitInfo hit)
+        {
+            if (hit.transform != null)
+            {
+                vfxObject.SetActive(false);
+                this.enabled = false;
+            }
+
+            return HasToReturn.canContinue;
         }
     }
 }

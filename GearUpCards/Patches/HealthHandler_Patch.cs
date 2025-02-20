@@ -15,8 +15,8 @@ namespace GearUpCards.Patches
     [HarmonyPatch(typeof(HealthHandler))]
     class HealthHandler_Patch
     {
-        public static Color arcaneHit_A = new Color(0.9f, 0.7f, 0.9f);
-        public static Color arcaneHit_B = new Color(0.9f, 0.4f, 0.9f);
+        public static Color arcaneHit_A = new Color(0.45f, 0.1f, 0.45f, 0.25f);
+        public static Color arcaneHit_B = new Color(0.65f, 0.2f, 0.65f, 0.4f);
 
         static float GetHealMultiplier(Player ___player)
         {
@@ -46,7 +46,7 @@ namespace GearUpCards.Patches
             healMuliplier *= Mathf.Pow(0.90f, medicCheckupStack);
 
             int medicalPartStack = stats.GetGearData().medicalPartStack;
-            healMuliplier *= Mathf.Pow(1.10f, medicalPartStack);
+            healMuliplier += 0.1f * medicalPartStack;
 
             return healMuliplier;
         }
@@ -143,6 +143,7 @@ namespace GearUpCards.Patches
                     damage *= 0.5f;
 
                     arcaneLifesteal = 0.5f;
+
                 }
                 else if (stackCount >= 2)
                 {
@@ -150,10 +151,10 @@ namespace GearUpCards.Patches
                     {
                         damage = damage.normalized;
                     }
-                    else
-                    {
-                        damage *= 0.1f;
-                    }
+                    // else
+                    // {
+                    //     damage *= 0.1f;
+                    // }
 
                     damagingPlayer = null;
 
@@ -163,10 +164,10 @@ namespace GearUpCards.Patches
                 if (stackCount > 2)
                 {
                     int delta = stackCount - 2;
-                    arcaneDamage *= Mathf.Pow(1.25f, delta);
+                    arcaneDamage *= Mathf.Pow(1.35f, delta);
                 }
 
-                if (sourceStats.lifeSteal > 0.0f)
+                if (sourceStats.lifeSteal != 0.0f)
                 {
                     float healing = sourceStats.lifeSteal * arcaneLifesteal * arcaneDamage.magnitude;
                     sourchHealth.Heal(healing);
@@ -179,19 +180,62 @@ namespace GearUpCards.Patches
         [HarmonyPostfix]
         [HarmonyPriority(Priority.Last)]
         [HarmonyPatch(methodName: "TakeDamage", argumentTypes: new Type[] { typeof(Vector2), typeof(Vector2), typeof(Color), typeof(GameObject), typeof(Player), typeof(bool), typeof(bool) })]
-        static void TakeDamage_B_ArcaneConversion(ref Color dmgColor, ref Player damagingPlayer)
+        static void TakeDamage_B_ArcaneConversion(ref Vector2 damage, ref Player damagingPlayer, ref Color dmgColor, Player ___player)
         {
-            if (damagingPlayer != null)
+            if (damagingPlayer == null)
             {
-                CharacterStatModifiers sourceStats = damagingPlayer.gameObject.GetComponent<CharacterStatModifiers>();
-                if (sourceStats.GetGearData().arcaneConversionStack > 0)
+                return;
+            }
+
+            CharacterStatModifiers sourceStats = damagingPlayer.gameObject.GetComponent<CharacterStatModifiers>();
+            HealthHandler sourchHealth = damagingPlayer.gameObject.GetComponent<HealthHandler>();
+            int stackCount = sourceStats.GetGearData().arcaneConversionStack;
+
+            HealthHandler targetHealth = ___player.gameObject.GetComponent<HealthHandler>();
+
+            if (stackCount > 0)
+            {
+                Vector2 arcaneDamage = damage;
+                float arcaneLifesteal = 0.0f;
+
+                if (stackCount == 1)
                 {
+                    arcaneDamage *= 0.5f;
+                    damage *= 0.5f;
+
+                    arcaneLifesteal = 0.5f;
                     dmgColor = arcaneHit_A;
                 }
-            }
-            else
-            {
-                dmgColor = arcaneHit_B;
+                else if (stackCount >= 2)
+                {
+                    if (damage.magnitude > 1.0f)
+                    {
+                        damage = damage.normalized;
+                    }
+                    // else
+                    // {
+                    //     damage *= 0.1f;
+                    // }
+
+                    damagingPlayer = null;
+
+                    arcaneLifesteal = 0.5f;
+                    dmgColor = arcaneHit_B;
+                }
+
+                if (stackCount > 2)
+                {
+                    int delta = stackCount - 2;
+                    arcaneDamage *= Mathf.Pow(1.35f, delta);
+                }
+
+                if (sourceStats.lifeSteal != 0.0f)
+                {
+                    float healing = sourceStats.lifeSteal * arcaneLifesteal * arcaneDamage.magnitude;
+                    sourchHealth.Heal(healing);
+                }
+
+                targetHealth.Heal(arcaneDamage.magnitude * -1.0f);
             }
         }
 
@@ -204,20 +248,22 @@ namespace GearUpCards.Patches
         }
 
 
-        [HarmonyPrefix]
-        [HarmonyPriority(Priority.Last)]
-        [HarmonyPatch("DoDamage")]
-        static void BountyScoreFromDamage(HealthHandler __instance, ref Vector2 damage, ref Player damagingPlayer, ref bool lethal, Player ___player)
-        {
-            int sourceID = -1;
-            if (damagingPlayer != null)
-            {
-                sourceID = damagingPlayer.playerID;
-            }
+        // delayed "Bounty" feature
+        // [HarmonyPrefix]
+        // [HarmonyPriority(Priority.Last)]
+        // [HarmonyPatch("DoDamage")]
+        // static void BountyScoreFromDamage(HealthHandler __instance, ref Vector2 damage, ref Player damagingPlayer, ref bool lethal, Player ___player)
+        // {
+        //     int sourceID = -1;
+        //     if (damagingPlayer != null)
+        //     {
+        //         sourceID = damagingPlayer.playerID;
+        //     }
+        // 
+        //     int targetID = ___player.playerID;
+        //     BountyDamageTracker.ScoreFromDamage(sourceID, targetID, damage.magnitude, lethal);
+        // }
 
-            int targetID = ___player.playerID;
-            BountyDamageTracker.ScoreFromDamage(sourceID, targetID, damage.magnitude, lethal);
-        }
 
         // [HarmonyPostfix]
         // [HarmonyPriority(Priority.First)]

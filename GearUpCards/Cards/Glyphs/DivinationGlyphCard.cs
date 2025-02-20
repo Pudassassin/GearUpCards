@@ -55,7 +55,7 @@ namespace GearUpCards.Cards
         }
         protected override string GetDescription()
         {
-            return "Bullets and Spells reach a little further AND quicker!";
+            return "Spells reach a little further AND quicker! Make [Mystic Missile] homes on enemy!";
         }
         protected override GameObject GetCardArt()
         {
@@ -82,14 +82,14 @@ namespace GearUpCards.Cards
                     stat = "Projectile Speed",
                     amount = "+15%",
                     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
-                },
-                new CardInfoStat()
-                {
-                    positive = true,
-                    stat = "Spell Range",
-                    amount = "Improved",
-                    simepleAmount = CardInfoStat.SimpleAmount.notAssigned
                 }
+                // new CardInfoStat()
+                // {
+                //     positive = true,
+                //     stat = "Spell Range",
+                //     amount = "Improved",
+                //     simepleAmount = CardInfoStat.SimpleAmount.notAssigned
+                // }
             };
         }
         protected override CardThemeColor.CardThemeColorType GetTheme()

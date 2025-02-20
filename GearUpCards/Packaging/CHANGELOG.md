@@ -1,5 +1,107 @@
 ## Patch Notes
 <details>
+<summary>Public Beta 5-0 [V0.5.0]</summary>
+
+- Added **[Laser Sight]** : Uncommon
+  - visuals for bullet trajectory, stacking increase range
+  - -20 deg spread
+  - +0.1s attack time
+
+- Added **[Hyper Regeneration]** : Uncommon
+  - +25 HP/s
+  - +0.5% HP/s
+  - -15% HP Cap
+
+- Added **[Medic!!!]** : Uncommon
+  - flat +250 HP
+  - -10% Heal Effects
+  - appear more for player with HP below 100, less for anyone above 500, none beyond 1000
+
+- Added **[Desolation]** : Uncommon
+- *"Blocking strips away nearby enemy block's defense and slow its recharge!"*
+  - Gear-based block card that get better with more copies of itself
+  - starts with 3s duration, 6s Cooldown
+  - +1s Block Cooldown
+
+- Added **[Protection Glyph]** - Common
+  - +0.15s min block cooldown that cannot be removed in anyway (for now)
+  - block I-Frame last longer (+35%)
+  - +0.1s Gun Attack time (can mess up high RPM build quick)
+  - reduce incoming spell's effects and damages
+
+- Reworked **[Magick Fragment]**
+  - now give -30% & -0.2s Block Cooldown
+  - no longer reduce HP but...
+  - block I-Frame last shorter (-35%)
+  - block echoes occur quicker
+
+- Added **[Arcane Conversion]** - Common (because only effective with multiple copies)
+  - 1st copy -- 75% bullet damage turned to negHeal, 50% lifesteal benefit (75% effective LS)
+  - 1st copy -- make spell deal full 'magic' damage
+  - 2nd copy -- 100% damage turned to negHeal, 50% lifesteal benefit
+  - 3rd copy and onward -- +35% all damage dealt, +10% all damage taken
+  - [Protection Glyph] reduce damage taken from arcane bullets by 10% per stack (diminishing)
+
+- Scaled up **[Hollow Life]**
+  - +200% > +300% HP
+  - -25% > -30% HP Cap
+  - -15% > -25% Heal Effects
+
+- Scaled Down **[Potency Glyph]**
+  - +65% > +50% Damage
+  - -15% > -10% HP
+
+- Rescaled **[Glyph CAD Module]**
+  - offer up to one Uncommon Glyph card
+  - more Glyphs weight, no longer boosting spell draws
+  - only boost stats bonus by ~50%
+
+- Shift **[Replication Glyph]** to **Rare**
+  - by default it won't be offer with [Glyph CAD Module]
+
+- Reworked **[Medical Parts]**
+  - flat 7.5 HP/s
+  - +10% Heal Effects, additively
+  - +50% > +25% HP
+
+- Scaled down **[Flak Cannon]** again
+  - has a hard limit on Attack Speed and cannot Burst-Fire
+  - overall damage reduced
+  - reduce projectiles spawned
+  - shell will bounce off player once and scatter right after with a brief delay
+
+- Reescale **[Tiberium Bullet]** burst HP drain
+  - shift its effect to be stronger long-term
+  - make it viable option for bullet-spam builds
+
+- Fixed **[Mystic Missile]**
+  - reduce explosion force in general
+  - clear up VFX persisting issue
+  - replace mystic missile blasts with animated images and reduce bullet particles, for now
+
+- **[Arc of Bullets]** now has minimum spread and no longer be focused down to pin-point
+
+- Fixed the underlying issue with **[Medical Parts]**, **[Glyph CAD Module]** and **[Bullets.rar]** stats modifiers
+
+- Changes on how booster pack extra draw works:
+  - **[Supply Drop]** to drop in after everyone else's card picks
+  - **[Vintage Gears]** and **[Supply Drop]** giving only **TWO** cards instead of three
+
+- Blacklist troublesome card combos, including
+  - BSC's [Pong] with unique gun mods
+  - RSClass' [Mirror Sage] with unique gun mods
+  - PCE's [Piercing Bullets] with [Arcane Conversion]
+  - Root's [Anonymity] with [Arcane Conversion]
+
+Minors:
+- add and update card arts!
+- add status bar for heal buff/debuff and block break
+- resize and adjust Arcane Sun's burn VFX
+- lots of card's description changes to make it brief (and lil' bigger)
+
+</details>
+
+<details>
 <summary>Public Beta 4-2 [V0.4.2]</summary>
 
 - make cards and spells that deal direct HP subtraction and life drains to utilize **Heal(negative)** function for proper interaction with damage-taken multipliers and to support displaying with \[DamageTracker]

@@ -46,9 +46,10 @@ namespace GearUpCards.MonoBehaviours
 
         private static float powerLevelMin = 0.10f;
 
-        private static float logBaseProj = 5.0f;
-        private static float dmgDiv = 25.0f;
-        private static float trailScale = 0.75f;
+        private static float VFXLogBase = 5.0f;
+        private static float VFXMinSize = 0.5f;
+        private static float VFXMaxSize = 25.0f;
+        private static float VFXTrailScale = 0.75f;
         private static float procTime = 0.05f;
 
         private MoveTransform bulletMove;
@@ -58,6 +59,8 @@ namespace GearUpCards.MonoBehaviours
         private SyncBulletPosition syncMono;
         private Miscs.SetColorToParticles partColor;
         private Miscs.SetColorToParticles partColorExp;
+
+        private ArcaneConversionModifier arcaneMod;
 
         private Player shooterPlayer;
         private Gun shooterGun;
@@ -98,6 +101,8 @@ namespace GearUpCards.MonoBehaviours
         private int bounceFromPlayer = 0;
         private bool dieNextHit = false;
 
+        private float coreDamageSum;
+
         // temps
         Vector3 moveVelocity, vecToTarget;
 
@@ -113,9 +118,23 @@ namespace GearUpCards.MonoBehaviours
                 //     // child.transform.localScale = Vector3.one * Mathf.Clamp(Mathf.Log(projectileHit.damage * projectileHit.dealDamageMultiplierr, logBaseProj), 1.0f, 15.0f);
                 //     child.transform.localScale = Vector3.one * Mathf.Clamp(projectileHit.damage * projectileHit.dealDamageMultiplierr / dmgDiv, 0.25f, 25.0f);
                 // }
-                transform.GetChild(0).transform.localScale = Vector3.one * Mathf.Clamp(projectileHit.damage * projectileHit.dealDamageMultiplierr / dmgDiv, 0.5f, 25.0f);
-                transform.GetChild(1).transform.localScale = Vector3.one * Mathf.Clamp(projectileHit.damage * projectileHit.dealDamageMultiplierr / dmgDiv, 1.0f, 25.0f) * trailScale;
 
+                // transform.GetChild(0).transform.localScale = Vector3.one * Mathf.Clamp(projectileHit.damage * projectileHit.dealDamageMultiplierr / dmgDiv, 0.5f, 25.0f);
+                // transform.GetChild(1).transform.localScale = Vector3.one * Mathf.Clamp(projectileHit.damage * projectileHit.dealDamageMultiplierr / dmgDiv, 1.0f, 25.0f) * trailScale;
+                
+                // scale bullet effect
+                coreDamageSum = projectileHit.damage;
+                if (arcaneMod != null)
+                {
+                    coreDamageSum += arcaneMod.arcaneDamage;
+                }
+                float scale = 1.0f + Mathf.Log(coreDamageSum / 55.0f, VFXLogBase);
+                scale = Mathf.Clamp(scale, VFXMinSize, VFXMaxSize);
+
+                transform.GetChild(0).transform.localScale = Vector3.one * scale;
+                transform.GetChild(1).transform.localScale = Vector3.one * scale * VFXTrailScale;
+
+                // update color and VFX radius
                 if (GearUpCards.EcoModeVFX)
                 {
                     // Miscs.Log("\n\n[GearUp] : MysticMissileMod - DoHitEffect() - Eco Update");
@@ -141,6 +160,7 @@ namespace GearUpCards.MonoBehaviours
 
                 partColor.targetColor = shooterGun.projectileColor;
 
+                // homing and power level update
                 if (tickTimer >= procTime)
                 {
                     // subject to change the glyph
@@ -256,7 +276,11 @@ namespace GearUpCards.MonoBehaviours
                 {
                     try
                     {
-                        Setup();
+                        this.ExecuteAfterFrames(1, () => 
+                        {
+                            Setup();
+                            effectEnable = true;
+                        });
                     }
                     catch (Exception exception)
                     {
@@ -265,7 +289,6 @@ namespace GearUpCards.MonoBehaviours
                         this.enabled = false;
                         return;
                     }
-                    effectEnable = true;
                 }
             }
         }
@@ -280,6 +303,7 @@ namespace GearUpCards.MonoBehaviours
             projectileHit = gameObject.GetComponentInParent<ProjectileHit>();
             bulletMove = gameObject.GetComponentInParent<MoveTransform>();
             explosionImpact = gameObject.GetComponent<Explosion>();
+            arcaneMod = transform.root.gameObject.GetComponentInChildren<ArcaneConversionModifier>();
 
             // fetch player stats
             // Miscs.Log("[GearUpCard] Mystic Missle: Setup() - fetch player stats");
@@ -336,14 +360,21 @@ namespace GearUpCards.MonoBehaviours
             }
 
             // setup Explosion impact script
-            // Miscs.Log("[GearUpCard] Mystic Missle: Setup() - setup Explosion impact script");
+            coreDamageSum = projectileHit.damage;
+            if (arcaneMod != null)
+            {
+                coreDamageSum += arcaneMod.arcaneDamage;
+            }
+
+            //Miscs.Log("[GearUpCard] Mystic Missle: Setup() - setup Explosion impact script");
             explosionImpact = MysticMissileCard.objectSpawnDict[shooterPlayer.playerID].effect.GetComponent<Explosion>();
 
             explosionImpact.auto = true;
-            // explosionImpact.ignoreWalls = true;
+            //explosionImpact.ignoreWalls = true;
             explosionImpact.force = explosionForceBase + explosionForceScaling * ((stackCount - 1) * 2 + glyphPotency);
             explosionImpact.range = explosionRadiusBase + explosionRadiusScaling * ((stackCount - 1) * 2 + glyphInfluence);
-            explosionImpact.damage = projectileHit.damage * (damageFactorBase + damageFactorScaling * ((stackCount - 1) * 2 + glyphPotency));
+            //explosionImpact.damage = projectileHit.damage * (damageFactorBase + damageFactorScaling * ((stackCount - 1) * 2 + glyphPotency));
+            explosionImpact.damage = coreDamageSum * projectileHit.dealDamageMultiplierr * (damageFactorBase + damageFactorScaling * ((stackCount - 1) * 2 + glyphPotency));
 
             explosionImpact.objectForceMultiplier = 3.0f;
             explosionImpact.scaleSlow = false;
@@ -424,9 +455,9 @@ namespace GearUpCards.MonoBehaviours
             transform.position = (Vector3)hit.point + (Vector3)hit.normal * 0.2f;
             syncMono.CallSyncs();
 
-            // Miscs.Log("\n\n[GearUp] : MysticMissileMod - DoHitEffect() - C");
-            // ...then explode and deal area magic damage
-            explosionImpact.damage = projectileHit.damage * (damageFactorBase + damageFactorScaling * ((stackCount - 1) * 2 + glyphPotency));
+            //Miscs.Log("\n\n[GearUp] : MysticMissileMod - DoHitEffect() - C");
+            // update power, explode and deal area magic damage
+            explosionImpact.damage = coreDamageSum * projectileHit.dealDamageMultiplierr * (damageFactorBase + damageFactorScaling * ((stackCount - 1) * 2 + glyphPotency));
             explosionImpact.damage *= Mathf.Clamp(currentPower, powerLevelMin, 2.0f);
 
             explosionImpact.force = explosionForceBase + explosionForceScaling * ((stackCount - 1) * 2 + glyphPotency);
