@@ -1,17 +1,68 @@
-# GearUP Cards [v0.4.0] 
-Public Release 0-4-0, build #252 (Unity-packed)
+# GearUP Cards [v0.5.0] 
+Public Release 0-5-0, build #315 (Unity-packed)
 
 Adding in game-changing mechanics into the modded ROUNDS fray! Bought to you by Pudassassin
 
 ## **Cards**
 
 <details>
-<summary>(NEW!) Booster Packs and Shuffles</summary>
+<summary>NEW! cards added</summary>
+
+#### **\[Desolation]** - Uncommon - *"Shield? Not seeing it!"*
+**Active Gear equipments** - Active block
+
+- Blocking inflict a debuff that stripping away enemy's block protection and slow down block cooldown
+
+- Multiple copies improve the ability
+
+#### **\[Hyper Regeneration]** - Uncommon - *"I will survive!"*
+**Passive Health stats**
+
+- Grant HP regen both flat and scaling ***based on your max health!***
+
+- Incur some ***HP Cap level*** that prevent healing past this point
+
+#### **\[Medic!!!]** - Uncommon, conditionally - *"Don't die on me!"*
+**Emergency Health stats**
+
+- Only shows up more often when you are below-hearty Max HP
+
+- ***Flat MAX HP*** boost in exchange for receiving less healing
+
+#### **\[Protection Glyph]** - Common - *"Shrug them off!"*
+**Damage reduction from spells** - Friends or foes
+
+- Block protection last a bit longer at the cost of forced minimal block cooldown and increased attack time
+
+- Block echoes and effect triggers less rapidly
+
+- *the opposite of \[Magick Fragment]*
+
+#### **\[Arcane Conversion]** - Common - *"Tis will go straight thru enemy..."*
+**Passive Damage modifier**
+
+- 1x copy: partially convert your damage dealt into hard-to-prevent "magic" damage
+
+- 2x copy: fully convert your damage dealt into hard-to-prevent "magic" damage, bypassing reactions, retaliations and protections
+
+- 3rd copy and onward boost your global damage and also slightly make you take more damage, too!
+
+#### **\[Laser Sight]** - Uncommon - *"Got you in my sight!"*
+**Passive Gun stats** - with visual assistance
+
+- Visualize your gun's approximate trajectory and potential spread; stacking extends the length
+
+- Tightens the gun's spread but also make it shoots slower
+
+</details>
+
+<details>
+<summary>Booster Packs and Shuffles</summary>
 
 #### \[Vintage Gears]
 **Booster Pack** - *Vanilla goodies*
 
-- Immediately gives you THREE new offers of Uncommon or lower rarity cards from vanilla ROUNDS.
+- Immediately gives you TWO new offers of Uncommon or lower rarity cards from vanilla ROUNDS.
 
 #### \[Veterans Friend]
 **Booster Pack** - *Vanilla's rares*
@@ -21,7 +72,7 @@ Adding in game-changing mechanics into the modded ROUNDS fray! Bought to you by 
 #### \[Supply Drop!]
 **Booster Pack** - *Just wait for it...*
 
-- It takes one match point delivery. But you will be given THREE new offer of Uncommon or lower rarity cards to pick from, any card pack!
+- It takes one match point delivery. But you will be given TWO new offer of Uncommon or lower rarity cards to pick from, any card pack!
 
 #### \[Pure Canvas]
 **Card offer Shuffle** - *Go for a new idea!*
@@ -35,16 +86,16 @@ Adding in game-changing mechanics into the modded ROUNDS fray! Bought to you by 
 <summary>Unique Magick, Orbs and Passive Spells</summary>
 
 #### \[Anti-Bullet Magick]
-- **Unique Magick** - *Spell caster*
+**Unique Magick** - *Spell caster*
 
 - *Blocking casts the spell that deletes all nearby bullets in flight and also in guns' magazines, including **yours!***
 
-- All players affected suffer **additional 3.5s reload time** on top of their own guns' reload time.
+- All players affected suffer **additional reload time** on top of their own guns' reload time.
 
 - Caster suffer less penalty from above.
 
 #### \[Portal Magick]
-- **Unique Magick** - *Spell caster*
+**Unique Magick** - *Spell caster*
 
 - *Blocking Create a pair of portals that teleport players **AND** projectiles from one to another with slight re-entry delays. Gun-fired bullets gains bonus damage and bounces going thru them!*
 
@@ -67,7 +118,7 @@ Adding in game-changing mechanics into the modded ROUNDS fray! Bought to you by 
 #### \[Lifeforce Blast!]
 **Active Orb Spell** - *Orb sage*
 
-- *Blocking cast the orb that heals & boosts friends' healings // damages & hinders foes' healings on impact.*
+- *Blocking cast the orb that heals & boosts friends' healings / damages & hinders foes' healings on impact.*
 
 - Inspired by and works similarly to Overwatch Ana's Biotic Grenade
 
@@ -132,7 +183,9 @@ Adding in game-changing mechanics into the modded ROUNDS fray! Bought to you by 
 
 - *This mysterious glyph hasten your spellcasting, but at what cost?*
 
-- on its own, it gives Block Cooldown reductions at the cost of some Health.
+- on its own, it gives Block Cooldown reductions at the cost of block's shorter protection time.
+
+- speeds up how rapid you block echoing, block effects triggering
 
 #### \[Divination Glyph]
 **Spell's reaches and trajectories**
@@ -171,7 +224,7 @@ Adding in game-changing mechanics into the modded ROUNDS fray! Bought to you by 
 
 - if there's bullet drag, it is decreased by 25%.
 
-- if the bullet's lifetime is limited or cut short, it is extended by +50%.
+- bullet's lifetime is extended by 50%.
 
 #### \[Replication Glyph]
 **Numbers of spell projectiles!**
@@ -219,7 +272,7 @@ Passive Health Stats
 - *Puffs up your total Max HP; you no longer heal as effective and to full health.
 **(Stack multiplicatively)***
 
-- Max HP is **multiplied by 3**, but also gain **-25% HP Cap** to the current health and **-15% to healing effects**. (Heals and Regens)
+- Max HP is **greatly multiplied**, but also incur **HP Cap level** that cannot heal past and **reduced healing effects**. (Heals and Regens)
 
 **Tip: Look for the cards that benefit from having larger Max HP pool, or having you to stay low on health, but definitely not \[Pristine Perserverance]!*
 
@@ -277,7 +330,7 @@ Passive Bullet Modifier - *Tiberium Prophecy*
 #### \[Glyph CAD Module]
 Passive CAD Module - Rarity modifier
 
-- *Your Gun and Block benefit **TWICE** the bonus from Glyphs and boost the chance of finding Spell and more Glyphs*
+- *Your Gun and Block benefit **+50%** the bonus from Glyphs and boost the chance of finding more Glyphs*
 
 - Now comes packed with a Glyph card of your choice!
 
@@ -295,7 +348,7 @@ Passive Gun Stats
 
 - *Some hearty doodads to help you survive longer.*
 
-- Simply giving you some Max Health and both flat and scaling HP regeneration.
+- Giving you some Max Health, flat HP regen and healing boost.
 
 #### \[Gun Parts]
 **Gun Passive** - *Material*
@@ -306,4 +359,4 @@ Passive Gun Stats
 </details>
 
 ## Note from the modder
-There will be more cards planned to expand in each category. This forth update release explores in "Booster Pack" and "Shuffle" for the options to control the fate of the card draws. Notably trying to bring the spotlight back to classic ROUNDS cards we all know and familar with.
+I will slowly updating the mod with cool and interesting ideas and also trying to make them fun and hassle-free to play with. This fifth update involved in balancing existing cards, visual / text revisions, under the hood bug fixes as well as band new cards.

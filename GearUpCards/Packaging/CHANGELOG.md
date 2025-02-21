@@ -18,7 +18,7 @@
   - appear more for player with HP below 100, less for anyone above 500, none beyond 1000
 
 - Added **[Desolation]** : Uncommon
-- *"Blocking strips away nearby enemy block's defense and slow its recharge!"*
+  - *"Blocking strips away nearby enemy block's defense and slow its recharge!"*
   - Gear-based block card that get better with more copies of itself
   - starts with 3s duration, 6s Cooldown
   - +1s Block Cooldown
