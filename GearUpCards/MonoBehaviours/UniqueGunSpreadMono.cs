@@ -60,7 +60,7 @@ namespace GearUpCards.MonoBehaviours
 
         // Flak Cannon Stat Clamps
         private const float FlakCannon_minAttackTime = 0.15f;
-        private const float FlakCannon_maxAttackMul = 1.5f;
+        private const float FlakCannon_maxAttackSpeedMul = 1.5f;
 
         public float statsDelta_FlakCannon_AttackTime_ADD = 0.0f;
         public float statsDelta_FlakCannon_AttackSpeedMul_MUL = 1.0f;
@@ -124,7 +124,7 @@ namespace GearUpCards.MonoBehaviours
             {
                 // hard-disabling gun burst
                 gun.timeBetweenBullets = 0.5f;
-                gun.bursts = 1;
+                gun.bursts = 0;
 
                 // hard-capping firerate - cooldown
                 if (gun.attackSpeed < FlakCannon_minAttackTime)
@@ -149,20 +149,20 @@ namespace GearUpCards.MonoBehaviours
                 }
 
                 // hard-capping firerate - rate multiplier
-                if (gun.attackSpeedMultiplier > FlakCannon_maxAttackMul)
+                if (gun.attackSpeedMultiplier > FlakCannon_maxAttackSpeedMul)
                 {
-                    statsDelta_FlakCannon_AttackSpeedMul_MUL *= FlakCannon_maxAttackMul / gun.attackSpeedMultiplier;
-                    gun.attackSpeedMultiplier = FlakCannon_maxAttackMul;
+                    statsDelta_FlakCannon_AttackSpeedMul_MUL *= FlakCannon_maxAttackSpeedMul / gun.attackSpeedMultiplier;
+                    gun.attackSpeedMultiplier = FlakCannon_maxAttackSpeedMul;
                 }
-                else if (gun.attackSpeedMultiplier < FlakCannon_maxAttackMul && statsDelta_FlakCannon_AttackSpeedMul_MUL < 1.0f)
+                else if (gun.attackSpeedMultiplier < FlakCannon_maxAttackSpeedMul && statsDelta_FlakCannon_AttackSpeedMul_MUL < 1.0f)
                 {
                     float tempMul = gun.attackSpeedMultiplier / statsDelta_FlakCannon_AttackSpeedMul_MUL;
                     statsDelta_FlakCannon_AttackSpeedMul_MUL = 1.0f;
 
-                    if (tempMul > FlakCannon_maxAttackMul)
+                    if (tempMul > FlakCannon_maxAttackSpeedMul)
                     {
-                        statsDelta_FlakCannon_AttackSpeedMul_MUL *= FlakCannon_maxAttackMul / tempMul;
-                        gun.attackSpeedMultiplier = FlakCannon_maxAttackMul;
+                        statsDelta_FlakCannon_AttackSpeedMul_MUL *= FlakCannon_maxAttackSpeedMul / tempMul;
+                        gun.attackSpeedMultiplier = FlakCannon_maxAttackSpeedMul;
                     }
                     else
                     {
@@ -405,7 +405,6 @@ namespace GearUpCards.MonoBehaviours
             {
                 // Miscs.CopyGunStats(gun, playerOldGun);
 
-
                 switch (stats.GetGearData().gunSpreadMod)
                 {
                     case GearUpConstants.ModType.gunSpreadArc:
@@ -467,14 +466,13 @@ namespace GearUpCards.MonoBehaviours
 
             newSpreadGun.attackID = player.playerID;
 
-            newSpreadGun.bursts = 1;
+            newSpreadGun.bursts = 0;
             newSpreadGun.timeBetweenBullets = 0.5f;
 
             newSpreadGun.attackSpeed = 0.35f + Mathf.Clamp(playerOldGun.attackSpeed * 1.35f, 0.0f, playerOldGun.attackSpeed);
             newSpreadGun.attackSpeedMultiplier = 0.1f + Mathf.Clamp(playerOldGun.attackSpeedMultiplier, 0.0f, 1.5f);
 
-            newSpreadGun.numberOfProjectiles = Mathf.CeilToInt(Mathf.Log(playerOldGun.numberOfProjectiles, 5));
-            newSpreadGun.numberOfProjectiles = Mathf.Clamp(newSpreadGun.numberOfProjectiles, 1, 3);
+            newSpreadGun.numberOfProjectiles = 1;
 
             newSpreadGun.damage = playerOldGun.damage * 0.80f;
             newSpreadGun.bulletDamageMultiplier = playerOldGun.bulletDamageMultiplier * 0.80f;
@@ -483,9 +481,9 @@ namespace GearUpCards.MonoBehaviours
             newSpreadGun.dmgMOnBounce = 1.0f;
             newSpreadGun.percentageDamage = 0.0f;
 
-            newSpreadGun.spread = playerOldGun.spread * 0.65f;
-            newSpreadGun.evenSpread = playerOldGun.evenSpread * 0.65f;
-            newSpreadGun.multiplySpread = playerOldGun.multiplySpread * 0.65f;
+            newSpreadGun.spread = playerOldGun.spread * 0.5f;
+            newSpreadGun.evenSpread = playerOldGun.evenSpread * 0.5f;
+            newSpreadGun.multiplySpread = playerOldGun.multiplySpread * 0.5f;
 
             newSpreadGun.projectileSpeed = Mathf.Clamp(playerOldGun.projectileSpeed * 1.25f, 0.25f, 7.5f);
             newSpreadGun.projectielSimulatonSpeed = Mathf.Clamp(playerOldGun.projectielSimulatonSpeed, 0.05f, 5.0f);
@@ -498,7 +496,7 @@ namespace GearUpCards.MonoBehaviours
             newSpreadGun.knockback = playerOldGun.knockback * 1.5f;
             newSpreadGun.recoil = playerOldGun.recoil * 0.05f;
 
-            // newSpreadGun.destroyBulletAfter = 0.0f;
+            newSpreadGun.destroyBulletAfter = 5.0f;
 
             //******//
             //fragmentation stats (Big sharpnel: has effects, less projectile)

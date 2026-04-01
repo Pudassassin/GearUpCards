@@ -48,7 +48,7 @@ namespace GearUpCards
     {
         public const string ModId = "com.pudassassin.rounds.GearUpCards";
         public const string ModName = "GearUpCards";
-        public const string Version = "0.4.3.55"; //build #315  / Release 0-5-0
+        public const string Version = "0.5.0.6"; //build #316  / Release 0-5-2
 
         public const string ModInitials = "GearUP";
 
@@ -327,6 +327,7 @@ namespace GearUpCards
                 // Vs other 'Piercing' damage card
                 MakeExclusive("Arcane Conversion", "Piercing Bullets");
                 MakeExclusive("Arcane Conversion", "Anonymity");
+                MakeExclusive("Arcane Conversion", "Sanitization");
 
                 // MakeExclusive("Arcane Conversion", "Gamer Ammunition");
                 // MakeExclusive("Arcane Conversion", "Armor-Piercing Rounds");

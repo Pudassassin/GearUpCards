@@ -12,13 +12,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Cards\BoosterPacks\SheriffCard.cs" />
     <Compile Remove="Cards\ShardSlinger.cs" />
     <Compile Remove="Cards\Template.cs" />
+    <Compile Remove="MonoBehaviours\BountyDamageTracker.cs" />
     <Compile Remove="MonoBehaviours\CrystalShardModifier.cs" />
     <Compile Remove="MonoBehaviours\PlayerEffects\CADModulesEffect.cs" />
     <Compile Remove="MonoBehaviours\PlayerStatus\ArcaneDamageOverTime.cs" />
     <Compile Remove="Patches\CardPickPatch.cs" />
     <Compile Remove="Utils\GunUtils.cs" />
+    <Compile Remove="Utils\PlayerCardResolver.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,9 +37,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Cards\BoosterPacks\SheriffCard.cs" />
+    <None Include="MonoBehaviours\BountyDamageTracker.cs" />
     <None Include="MonoBehaviours\PlayerEffects\CADModulesEffect.cs" />
     <None Include="Patches\CardPickPatch.cs" />
     <None Include="Utils\GunUtils.cs" />
+    <None Include="Utils\PlayerCardResolver.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -78,6 +84,9 @@
     </Reference>
     <Reference Include="RarityLib">
       <HintPath>..\..\Toolkit\Modding Libraries\RarityLib.dll</HintPath>
+    </Reference>
+    <Reference Include="SonigonAudioEngine.Runtime">
+      <HintPath>..\..\RoundMod AssetsPlus\Assets\Scripts\Mods\dlls\SonigonAudioEngine.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="UnboundLib">
       <HintPath>..\..\Toolkit\Modding Libraries\willis81808-UnboundLib\UnboundLib.dll</HintPath>

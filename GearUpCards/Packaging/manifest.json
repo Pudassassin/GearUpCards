@@ -1,6 +1,6 @@
 {
     "name": "GearUpCards",
-    "version_number": "0.5.0",
+    "version_number": "0.5.1",
     "website_url": "https://github.com/Pudassassin/GearUpCards",
     "description": "Adding in some game-changing cards to the fray!",
     "author": "Pudassassin",
@@ -13,6 +13,7 @@
         "willuwontu-EvenSpreadPatch-0.0.0",
         "TeamDK-ZeroGBulletPatch-1.1.0",
         "Root-RarityLib-1.2.1",
-        "Root-UtilityCategories-0.1.0"
+        "Root-UtilityCategories-0.1.0",
+        "RS_Mind-FancyCardBar-1.2.0"
     ]
 }
